@@ -13,5 +13,13 @@
   "dependencies": {
     "@capacitor/cli": "^7.4.4",
     "@capacitor/core": "^7.4.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cuongqtx11/p12ipa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Cuongqtx11/p12ipa/issues"
+  },
+  "homepage": "https://github.com/Cuongqtx11/p12ipa#readme"
 }
