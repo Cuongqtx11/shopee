@@ -117,8 +117,8 @@
 
 <script>
 const AFF_ID = "17327330054";
-const PROMOTIONS_URL = "https://sharelink-kappa.vercel.app/promotions";
-const FLASHSALE_URL = "https://sharelink-kappa.vercel.app/flash_sale";
+const PROMOTIONS_URL = "/api/flashsale?action=promotions";
+const FLASHSALE_URL = "/api/flashsale";
 const FALLBACK_FILE = "./fallback-products.json";
 
 let state = {
@@ -157,20 +157,22 @@ function normalizeItem(item) {
   const itemId = item?.itemid || item?.item_id || item?.itemId || (item?.i && item?.y && item?.t
     ? Math.round((item.i - 65756.757 + item.y + item.t) / 2.15)
     : null);
-  const image = item?.image_url || item?.image || item?.item_image || "";
+  const image = item?.img_url || item?.image_url || item?.image || item?.item_image || "";
   const imageUrl = image && image.startsWith('http') ? image : (image ? `https://cf.shopee.vn/file/${image}` : '');
   const productUrl = item?.product_url || item?.link || item?.url || (shopId && itemId ? `https://shopee.vn/product/${shopId}/${itemId}` : "https://shopee.vn/flash_sale");
   const price = Number(item?.price || 0);
   const before = Number(item?.price_before_discount || item?.priceBeforeDiscount || 0);
   const percent = item?.flash_sale_stock && item?.stock >= 0
     ? Math.min(100, Math.max(1, Math.round(((item.flash_sale_stock - item.stock) / item.flash_sale_stock) * 100)))
-    : Number(item?.sold_percent || item?.soldPercent || 12) || 12;
+    : Number(item?.sold_percent || item?.soldPercent || item?.sold || 12) || 12;
+
+  const normalizePrice = (value) => value > 1000000 ? Math.round(value / 100000) : value;
 
   return {
     name: item?.name || item?.title || 'Sản phẩm Shopee',
-    price: price > 100000 ? Math.round(price / 100000) : price,
-    priceBeforeDiscount: before > 100000 ? Math.round(before / 100000) : before,
-    discount: Number(item?.discount || 0),
+    price: normalizePrice(price),
+    priceBeforeDiscount: normalizePrice(before),
+    discount: Number(item?.discount || item?.raw_discount || 0),
     imageUrl,
     productUrl,
     soldPercent: percent
@@ -243,10 +245,11 @@ async function fetchFlashSale(pid) {
   emptyEl.style.display = 'none';
 
   try {
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`${FLASHSALE_URL}?promotionid=${pid}`)}`;
-    const res = await fetch(proxyUrl);
-    const raw = await res.json();
-    const data = JSON.parse(raw.contents || '[]');
+    const qs = new URLSearchParams();
+    if (pid) qs.set('promotionid', pid);
+    if (state.keyword.trim()) qs.set('keyword', state.keyword.trim());
+    const res = await fetch(`${FLASHSALE_URL}?${qs.toString()}`);
+    const data = await res.json();
     const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
 
     if (normalized.length > 0) {
@@ -339,14 +342,13 @@ function updateCountdown() {
 
 function handleSearch() {
   state.keyword = kwInput.value || '';
-  renderGrid(getFilteredData());
+  fetchFlashSale(state.currentPid);
 }
 
 searchBtn.addEventListener('click', handleSearch);
 kwInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleSearch();
 });
-kwInput.addEventListener('input', handleSearch);
 
 init();
 </script>
