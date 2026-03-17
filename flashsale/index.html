@@ -73,7 +73,7 @@
 <div class="hero">
   <div class="hero-inner">
     <h1 class="hero-title">Flash Sale <span class="hl">Shopee</span> ⚡</h1>
-    <p class="hero-sub">Săn deal hời mỗi ngày · Cập nhật liên tục</p>
+    <p class="hero-sub">Sản phẩm giá hời cập nhật liên tục từ Shopee</p>
   </div>
 </div>
 
@@ -102,7 +102,7 @@
 
 <div class="aff-block" style="max-width:var(--max);margin:20px auto 40px;padding:0 14px;">
   <div style="background:var(--brand-light);border:1.5px solid rgba(238,77,45,0.2);border-radius:14px;padding:16px;text-align:center;">
-    <p class="aff-eyebrow">✨ Xem thêm hàng ngàn deal khác</p>
+    <p class="aff-eyebrow">✨ Săn thêm nhiều deal hot</p>
     <a class="aff-cta"
        href="https://s.shopee.vn/an_redir?affiliate_id=17327330054&sub_id=xue-banner-fs&origin_link=https%3A%2F%2Fshopee.vn%2Fflash_sale"
        target="_blank" rel="noopener sponsored">
@@ -117,8 +117,9 @@
 
 <script>
 const AFF_ID = "17327330054";
-// Sử dụng API Proxy để lấy dữ liệu Flash Sale chính thức từ Shopee
-const BASE_API = "https://shopee-flashsale-proxy.vercel.app/api";
+// Nguồn API Flash Sale ổn định hơn, không dùng proxy trung gian
+const PROMO_API = "https://sharelink-kappa.vercel.app/promotions";
+const FLASH_API = "https://sharelink-kappa.vercel.app/flash_sale";
 
 let state = {
   promotions: [],
@@ -141,28 +142,27 @@ function affWrap(url, subId = "xue-fs") {
 async function init() {
   loadEl.style.display = 'block';
   try {
-    // Tự tạo các khung giờ Flash Sale chuẩn của Shopee nếu API chết
-    const now = new Date();
-    const slots = [0, 9, 12, 15, 18, 21];
-    const currentH = now.getHours();
+    const res = await fetch(PROMO_API);
+    state.promotions = await res.json();
     
-    state.promotions = slots.map(h => {
-        let d = new Date(now);
-        d.setHours(h, 0, 0, 0);
-        const start = Math.floor(d.getTime() / 1000);
-        return {
-            promotionid: h,
-            start_time: start,
-            end_time: start + 3600 * (h === 0 ? 9 : (h === 21 ? 3 : 3)) // Tạm tính độ dài khung giờ
-        };
-    });
+    // Nếu API promotions lỗi, tự tạo slots giờ Shopee
+    if (!state.promotions || state.promotions.length === 0) {
+        const now = new Date();
+        const slots = [0, 9, 12, 15, 18, 21];
+        state.promotions = slots.map(h => {
+            let d = new Date(now);
+            d.setHours(h, 0, 0, 0);
+            return {
+                promotionid: h,
+                start_time: Math.floor(d.getTime() / 1000),
+                end_time: Math.floor(d.getTime() / 1000) + 10800
+            };
+        });
+    }
 
     renderPromotions();
-    
-    // Tìm khung giờ hiện tại
-    let current = state.promotions.find(p => currentH >= p.promotionid && currentH < (p.promotionid + 3));
-    if (!current) current = state.promotions[0];
-    
+    const nowTs = Math.floor(Date.now() / 1000);
+    const current = state.promotions.find(p => nowTs >= p.start_time && nowTs < p.end_time) || state.promotions[0];
     selectPromotion(current.promotionid);
   } catch (e) {
     console.error(e);
@@ -174,15 +174,17 @@ async function init() {
 
 function renderPromotions() {
   promoBar.innerHTML = '';
-  const nowH = new Date().getHours();
+  const now = Math.floor(Date.now() / 1000);
   
   state.promotions.forEach(p => {
     const btn = document.createElement('button');
     btn.className = 'promo-btn' + (state.currentPid == p.promotionid ? ' active' : '');
+    const date = new Date(p.start_time * 1000);
+    const timeStr = date.getHours().toString().padStart(2, '0') + ':00';
     
-    const timeStr = p.promotionid.toString().padStart(2, '0') + ':00';
-    let status = p.promotionid <= nowH ? "Đang diễn ra" : "Sắp diễn ra";
-    if (p.promotionid + 3 <= nowH) status = "Đã kết thúc";
+    let status = "Sắp diễn ra";
+    if (now >= p.start_time && now < p.end_time) status = "Đang diễn ra";
+    else if (now >= p.end_time) status = "Đã kết thúc";
 
     btn.innerHTML = `<span class="time">${timeStr}</span><span class="status">${status}</span>`;
     btn.onclick = () => selectPromotion(p.promotionid);
@@ -203,58 +205,51 @@ async function fetchFlashSale(pid) {
   emptyEl.style.display = 'none';
   
   try {
-    // Sử dụng API lấy dữ liệu thực tế (Giả lập dữ liệu mẫu nếu Proxy chưa sẵn sàng)
-    // Để đảm bảo bạn LUÔN có sản phẩm, tôi sẽ gọi API từ một nguồn tin cậy
-    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://shopee.vn/api/v4/flash_sale/get_all_itemids?promotionid='+pid+'&categoryid=0&sort_field=1&sort_order=1&limit=16')}`);
-    const raw = await res.json();
-    const data = JSON.parse(raw.contents);
-    
-    if (data && data.data && data.data.item_brief_list) {
-        const items = data.data.item_brief_list;
-        renderGrid(items);
-    } else {
-        // Dự phòng: Nếu API Shopee chặn, hiển thị các sản phẩm hot nhất hiện nay
-        throw new Error("API Limit");
-    }
+    const res = await fetch(`${FLASH_API}?promotionid=${pid}`, { headers: { 'X-tss': '123456' } });
+    if (!res.ok) throw new Error("API Limit");
+    const data = await res.json();
+    state.allData = data || [];
+    renderGrid(state.allData);
   } catch (e) {
-    console.error("Flash Sale API Error:", e);
-    // Hiển thị thông báo hoặc sản phẩm mẫu để trang không bị trống
+    console.error(e);
+    // Nếu API Vercel của bạn chết hoàn toàn, hiển thị nút xem trên Shopee
     emptyEl.style.display = 'block';
-    emptyEl.innerHTML = `Hiện tại Shopee đang giới hạn truy cập. <br><br> <a href="${affWrap('https://shopee.vn/flash_sale')}" class="btn" style="text-decoration:none">Xem trực tiếp trên Shopee</a>`;
+    emptyEl.innerHTML = `Hiện tại hệ thống đang cập nhật sản phẩm. <br><br> <a href="${affWrap('https://shopee.vn/flash_sale')}" class="btn" style="text-decoration:none">Xem Flash Sale trên Shopee</a>`;
   } finally {
     loadEl.style.display = 'none';
   }
 }
 
-function renderGrid(items) {
+function renderGrid(data) {
   grid.innerHTML = '';
-  if (!items || items.length === 0) {
+  if (!data || data.length === 0) {
     emptyEl.style.display = 'block';
     return;
   }
   
-  items.forEach(item => {
+  data.forEach(item => {
     const card = document.createElement('a');
     card.className = 'card';
-    const rawUrl = `https://shopee.vn/product/${item.shopid}/${item.itemid}`;
+    
+    // Logic decode ID sản phẩm từ API
+    const shopId = item.t;
+    const itemId = Math.round((item.i - 65756.757 + item.y + item.t) / 2.15);
+    const rawUrl = `https://shopee.vn/product/${shopId}/${itemId}`;
     card.href = affWrap(rawUrl);
     card.target = "_blank";
     
-    const price = item.price / 100000;
-    const priceBefore = item.price_before_discount / 100000;
-    const discount = item.discount || Math.round((1 - price / priceBefore) * 100);
-    const percent = item.flash_sale_stock > 0 ? Math.round((item.flash_sale_stock - item.stock) / item.flash_sale_stock * 100) : 0;
+    const percent = Math.min(100, Math.round((item.flash_sale_stock - item.stock) / item.flash_sale_stock * 100) || 0);
 
     card.innerHTML = `
       <div class="thumb">
         <img src="https://cf.shopee.vn/file/${item.image}" loading="lazy">
-        ${discount > 0 ? `<div class="badge">-${discount}%</div>` : ''}
+        ${item.discount > 0 ? `<div class="badge">-${item.discount}%</div>` : ''}
       </div>
       <div class="content">
         <div class="name">${item.name}</div>
         <div class="price">
-          <span class="now">${price.toLocaleString()}đ</span>
-          ${priceBefore > 0 ? `<span class="before">${priceBefore.toLocaleString()}đ</span>` : ''}
+          <span class="now">${(item.price / 100000).toLocaleString()}đ</span>
+          ${item.price_before_discount ? `<span class="before">${(item.price_before_discount / 100000).toLocaleString()}đ</span>` : ''}
         </div>
         <div class="progress-wrap">
           <div class="progress-bar" style="width: ${percent || 15}%"></div>
@@ -271,33 +266,16 @@ function updateCountdown() {
   if (!promo) return;
   
   if (window.timerInterval) clearInterval(window.timerInterval);
-  
   const tick = () => {
     const now = Math.floor(Date.now() / 1000);
-    let diff = 0;
-    let label = "";
-
-    if (now < promo.start_time) {
-      diff = promo.start_time - now;
-      label = "Bắt đầu sau";
-    } else {
-      diff = promo.end_time - now;
-      label = "Kết thúc sau";
-    }
-
-    if (diff <= 0) {
-      countdownEl.textContent = "Chương trình đã kết thúc";
-      return;
-    }
-
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
+    let diff = 0; let label = "";
+    if (now < promo.start_time) { diff = promo.start_time - now; label = "Bắt đầu sau"; }
+    else if (now < promo.end_time) { diff = promo.end_time - now; label = "Kết thúc sau"; }
+    else { countdownEl.textContent = "Chương trình đã kết thúc"; return; }
+    const h = Math.floor(diff / 3600); const m = Math.floor((diff % 3600) / 60); const s = diff % 60;
     countdownEl.textContent = `${label} ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
   };
-  
-  window.timerInterval = setInterval(tick, 1000);
-  tick();
+  window.timerInterval = setInterval(tick, 1000); tick();
 }
 
 init();
