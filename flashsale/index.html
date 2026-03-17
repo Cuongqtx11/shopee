@@ -34,6 +34,10 @@
     .thumb    { position:relative; width:100%; padding-top:100%; background:#f1f5f9; }
     .thumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
     .badge    { position:absolute; top:8px; left:8px; background:var(--brand); color:#fff; font-size:11px; font-weight:800; border-radius:4px; padding:2px 6px; z-index: 1; }
+    .price-tag { position:absolute; left:8px; bottom:8px; color:#fff; font-size:10px; font-weight:900; border-radius:999px; padding:4px 8px; z-index:1; box-shadow:0 4px 12px rgba(0,0,0,.18); }
+    .price-tag.zero { background:linear-gradient(90deg,#22c55e,#16a34a); }
+    .price-tag.onek { background:linear-gradient(90deg,#ef4444,#f97316); }
+    .price-tag.ninek { background:linear-gradient(90deg,#8b5cf6,#ec4899); }
     .soldout-badge { position:absolute; right:8px; top:8px; background:#0f172a; color:#fff; font-size:10px; font-weight:800; border-radius:999px; padding:4px 8px; z-index:1; }
     
     .content  { padding:10px; display:flex; flex-direction:column; gap:6px; flex:1; }
@@ -149,10 +153,24 @@ function affWrap(url, subId = "xue-fs") {
   return `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=${subId}&origin_link=${encodeURIComponent(url)}`;
 }
 
+const PRICE_BUCKETS = {
+  zero: { min: 0, max: 0 },
+  onek: { min: 1, max: 2990 },
+  ninek: { min: 5000, max: 14990 }
+};
+
 function formatPrice(value) {
   const n = Number(value) || 0;
   if (!n) return "0đ";
   return `${n.toLocaleString('vi-VN')}đ`;
+}
+
+function getPriceBucket(price) {
+  const p = Number(price) || 0;
+  if (p === 0) return 'zero';
+  if (p >= PRICE_BUCKETS.onek.min && p <= PRICE_BUCKETS.onek.max) return 'onek';
+  if (p >= PRICE_BUCKETS.ninek.min && p <= PRICE_BUCKETS.ninek.max) return 'ninek';
+  return 'other';
 }
 
 function normalizeItem(item) {
@@ -173,12 +191,10 @@ function normalizeItem(item) {
     : Number(item?.sold_percent || item?.soldPercent || 0);
   const isSoldOut = totalStock > 0 ? sold >= totalStock : stock === 0;
 
-  const normalizePrice = (value) => value > 1000000 ? Math.round(value / 100000) : value;
-
   return {
     name: item?.name || item?.title || 'Sản phẩm Shopee',
-    price: normalizePrice(price),
-    priceBeforeDiscount: normalizePrice(before),
+    price: price,
+    priceBeforeDiscount: before,
     discount: Number(item?.discount || item?.raw_discount || 0),
     imageUrl,
     productUrl,
@@ -186,13 +202,17 @@ function normalizeItem(item) {
     totalStock: Number.isFinite(totalStock) ? totalStock : null,
     sold: Number.isFinite(sold) ? sold : 0,
     soldPercent: Number.isFinite(soldPercent) ? soldPercent : 0,
-    isSoldOut
+    isSoldOut,
+    priceBucket: getPriceBucket(price)
   };
 }
 
 function sortProducts(items) {
+  const bucketOrder = { zero: 0, onek: 1, ninek: 2, other: 3 };
   return [...items].sort((a, b) => {
     if (a.isSoldOut !== b.isSoldOut) return a.isSoldOut ? 1 : -1;
+    const bucketDiff = (bucketOrder[a.priceBucket] ?? 9) - (bucketOrder[b.priceBucket] ?? 9);
+    if (bucketDiff !== 0) return bucketDiff;
     if (a.price !== b.price) return a.price - b.price;
     if ((b.discount || 0) !== (a.discount || 0)) return (b.discount || 0) - (a.discount || 0);
     return (a.soldPercent || 0) - (b.soldPercent || 0);
@@ -318,22 +338,30 @@ function renderGrid(data) {
     card.rel = 'noopener sponsored';
 
     const remain = item.totalStock != null ? Math.max(0, item.totalStock - item.sold) : item.stock;
+    const priceTag = item.priceBucket === 'zero'
+      ? '<div class="price-tag zero">0Đ</div>'
+      : item.priceBucket === 'onek'
+        ? '<div class="price-tag onek">1K</div>'
+        : item.priceBucket === 'ninek'
+          ? '<div class="price-tag ninek">9K</div>'
+          : '';
     card.innerHTML = `
       <div class="thumb">
         <img src="${item.imageUrl}" loading="lazy" alt="${item.name.replace(/"/g, '&quot;')}">
         ${item.discount > 0 ? `<div class="badge">-${item.discount}%</div>` : ''}
+        ${priceTag}
         ${item.isSoldOut ? '<div class="soldout-badge">HẾT HÀNG</div>' : ''}
       </div>
       <div class="content">
         <div class="name">${item.name}</div>
+        <div class="price">
+          <span class="now">${formatPrice(item.price)}</span>
+          ${item.priceBeforeDiscount ? `<span class="before">${formatPrice(item.priceBeforeDiscount)}</span>` : ''}
+        </div>
         <div class="meta">
           <div class="stock-row"><span>Đã bán:</span><strong>${item.sold?.toLocaleString('vi-VN') || 0}</strong></div>
           <div class="stock-row"><span>Còn lại:</span><strong>${remain != null ? Number(remain).toLocaleString('vi-VN') : '—'}</strong></div>
           <div class="stock-row"><span>Tổng flash sale:</span><strong>${item.totalStock != null ? Number(item.totalStock).toLocaleString('vi-VN') : '—'}</strong></div>
-        </div>
-        <div class="price">
-          <span class="now">${formatPrice(item.price)}</span>
-          ${item.priceBeforeDiscount ? `<span class="before">${formatPrice(item.priceBeforeDiscount)}</span>` : ''}
         </div>
         <div class="progress-wrap">
           <div class="progress-bar" style="width: ${item.soldPercent}%"></div>
