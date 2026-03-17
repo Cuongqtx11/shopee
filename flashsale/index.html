@@ -7,7 +7,6 @@
   <meta name="description" content="Flash Sale Shopee realtime. Giá cực rẻ, hàng còn ít — mua ngay!">
   <link rel="stylesheet" href="../style.css">
   <style>
-    /* ── Flash Sale–specific styles ── */
     :root {
       --bg:#f8fafc; --card:#ffffff; --text-fs:#0f172a; --muted:#475569;
       --ring:#e2e8f0; --shadow-fs: 0 4px 20px rgba(2,6,23,.08);
@@ -17,39 +16,40 @@
     .pill     { display:flex; gap:8px; align-items:center; background:var(--card); border:1px solid var(--ring); border-radius:999px; padding:10px 12px; box-shadow:var(--shadow-fs); }
     .pill input { border:none; outline:none; background:transparent; width:100%; font-family:var(--font); font-size:14px; }
     .btn      { display:inline-flex; justify-content:center; align-items:center; gap:6px; background:var(--brand); color:#fff; border:none; border-radius:999px; padding:10px 14px; font-weight:800; cursor:pointer; font-family:var(--font); }
-    .btn:active { transform:translateY(1px); }
-    .seg-wrap { padding:0 0 12px; }
-    .segmented{ display:flex; gap:8px; background:var(--card); border:1px solid var(--ring); border-radius:999px; padding:6px; box-shadow:var(--shadow-fs); overflow:auto; }
-    .seg      { flex:1; white-space:nowrap; border:none; background:transparent; padding:8px 14px; border-radius:999px; font-weight:700; color:var(--muted); cursor:pointer; font-family:var(--font); }
-    .seg.active { background:var(--text-fs); color:#fff; }
-    .countdown-wrap { padding:4px 0 12px; display:flex; justify-content:center; }
-    #countdown{ font-size:13px; font-weight:600; padding:2px 8px; border-radius:999px; color:var(--text-fs); background:rgba(255,255,255,0.5); display:inline-flex; align-items:center; white-space:nowrap; }
-    .promo-bar{ display:flex; overflow-x:auto; gap:8px; padding:10px 14px; max-width:1000px; margin:0 auto; }
-    .promo-btn{ flex:0 0 auto; padding:8px 12px; border-radius:12px; border:1px solid var(--ring); background:var(--card); cursor:pointer; font-weight:700; font-family:var(--font); box-shadow:var(--shadow-fs); color:var(--muted); }
+    .promo-bar{ display:flex; overflow-x:auto; gap:8px; padding:10px 14px; max-width:1000px; margin:0 auto; scrollbar-width: none; }
+    .promo-bar::-webkit-scrollbar { display: none; }
+    .promo-btn{ flex:0 0 auto; padding:8px 12px; border-radius:12px; border:1px solid var(--ring); background:var(--card); cursor:pointer; font-weight:700; font-family:var(--font); box-shadow:var(--shadow-fs); color:var(--muted); text-align: center; min-width: 80px; }
     .promo-btn.active { background:var(--brand); color:#fff; border-color:var(--brand); }
+    .promo-btn .time { font-size: 16px; display: block; }
+    .promo-btn .status { font-size: 10px; font-weight: 600; opacity: 0.8; }
+    
+    .countdown-wrap { padding:4px 0 12px; display:flex; justify-content:center; }
+    #countdown{ font-size:13px; font-weight:600; padding:2px 12px; border-radius:999px; color:#fff; background:var(--brand); display:inline-flex; align-items:center; }
+
     .grid     { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:0 14px 40px; max-width:1000px; margin:0 auto; }
     @media(min-width:720px){ .grid{ grid-template-columns:repeat(4,minmax(0,1fr)); } }
-    .card     { background:var(--card); border:1px solid var(--ring); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-fs); display:flex; flex-direction:column; text-decoration: none; }
-    .thumb    { position:relative; width:100%; padding-top:100%; background:#eef2f7; }
+    
+    .card     { background:var(--card); border:1px solid var(--ring); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-fs); display:flex; flex-direction:column; text-decoration: none; position: relative; transition: transform 0.2s; }
+    .card:hover { transform: translateY(-3px); }
+    .thumb    { position:relative; width:100%; padding-top:100%; background:#f1f5f9; }
     .thumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-    .badge    { position:absolute; top:8px; left:8px; background:var(--brand); color:#fff; font-size:12px; font-weight:700; border-radius:10px; padding:4px 8px; }
-    .labels   { position:absolute; bottom:8px; left:8px; display:flex; gap:6px; flex-wrap:wrap; }
-    .label    { background:rgba(255,255,255,.9); color:var(--text-fs); border:1px solid var(--ring); font-size:11px; font-weight:700; padding:2px 6px; border-radius:8px; }
-    .soldout  { position:absolute; inset:0; background:rgba(0,0,0,.55); color:#fff; font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; }
-    .content  { padding:10px; display:flex; flex-direction:column; gap:4px; flex:1; }
-    .name     { font-size:13px; font-weight:600; line-height:1.4; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; color:var(--text-fs); }
-    .price    { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .badge    { position:absolute; top:8px; left:8px; background:var(--brand); color:#fff; font-size:11px; font-weight:800; border-radius:4px; padding:2px 6px; z-index: 1; }
+    
+    .content  { padding:10px; display:flex; flex-direction:column; gap:6px; flex:1; }
+    .name     { font-size:13px; font-weight:600; line-height:1.4; height: 36px; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; color:var(--text-fs); }
+    .price    { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top: auto; }
     .now      { font-size:15px; font-weight:800; color:var(--brand); }
-    .before   { font-size:12px; color:var(--muted); text-decoration:line-through; }
-    .stock    { font-size:11px; color:var(--muted); }
-    .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
+    .before   { font-size:11px; color:var(--muted); text-decoration:line-through; }
+    
+    .progress-wrap { position: relative; height: 16px; background: #ffe3df; border-radius: 10px; overflow: hidden; margin-top: 4px; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #ff7043, #ee4d2d); border-radius: 10px; }
+    .progress-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+    .skeleton { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
     @keyframes shimmer { to { background-position: -200% 0; } }
-    #loadingOverlay { display:none; }
-    .back-top { position:fixed; bottom:20px; right:16px; z-index:99; background:var(--brand); color:#fff; border-radius:50%; width:40px; height:40px; display:none; align-items:center; justify-content:center; font-size:18px; box-shadow:0 4px 12px rgba(0,0,0,0.15); cursor:pointer; border:none; transition:opacity 0.2s; }
-    .back-top.visible { display:flex; }
-    .sentinel { height: 1px; }
-    #empty    { display:none; text-align:center; padding:40px 20px; color:var(--muted); font-weight:600; }
-    #more-btn { display:none; margin:16px auto 0; padding:10px 24px; background:var(--brand); color:#fff; border:none; border-radius:20px; font-family:var(--font); font-weight:800; cursor:pointer; font-size:14px; }
+    
+    #empty { display:none; text-align:center; padding:60px 20px; color:var(--muted); font-weight:600; }
+    #loading { text-align:center; padding:40px; }
   </style>
 </head>
 <body>
@@ -73,253 +73,230 @@
 <div class="hero">
   <div class="hero-inner">
     <h1 class="hero-title">Flash Sale <span class="hl">Shopee</span> ⚡</h1>
-    <p class="hero-sub">Cập nhật realtime · Giá cực rẻ · Nhanh tay kẻo hết hàng!</p>
+    <p class="hero-sub">Sản phẩm giá hời cập nhật liên tục từ Shopee</p>
   </div>
 </div>
 
-<!-- Promo time slots -->
 <div class="promo-bar" id="promoBar"></div>
-<div class="countdown-wrap"><span id="countdown"></span></div>
+<div class="countdown-wrap"><span id="countdown">Đang tải...</span></div>
 
-<!-- Search + Sort toolbar -->
 <div class="fs-wrap">
   <div class="toolbar">
     <div class="pill">
       <span>🔍</span>
-      <input type="text" id="kw" placeholder="Tìm sản phẩm..." autocomplete="off">
+      <input type="text" id="kw" placeholder="Tìm sản phẩm flash sale..." autocomplete="off">
     </div>
     <button class="btn" id="searchBtn">Tìm</button>
   </div>
-  <div class="seg-wrap">
-    <div class="segmented" id="sortSeg">
-      <button class="seg" data-v="price|1">Rẻ nhất</button>
-      <button class="seg" data-v="price|-1">Đắt nhất</button>
-      <button class="seg" data-v="sales|1">Bán chạy</button>
-      <button class="seg" data-v="discount|-1">Giảm nhiều</button>
-    </div>
+</div>
+
+<div id="loading" style="display:none">
+  <div class="skeleton" style="width:100px; height:20px; margin: 0 auto 20px;"></div>
+  <div class="grid">
+    <div class="card"><div class="thumb skeleton"></div><div class="content"><div class="skeleton" style="height:15px"></div><div class="skeleton" style="height:20px; width:60%"></div></div></div>
+    <div class="card"><div class="thumb skeleton"></div><div class="content"><div class="skeleton" style="height:15px"></div><div class="skeleton" style="height:20px; width:60%"></div></div></div>
+    <div class="card"><div class="thumb skeleton"></div><div class="content"><div class="skeleton" style="height:15px"></div><div class="skeleton" style="height:20px; width:60%"></div></div></div>
+    <div class="card"><div class="thumb skeleton"></div><div class="content"><div class="skeleton" style="height:15px"></div><div class="skeleton" style="height:20px; width:60%"></div></div></div>
   </div>
 </div>
 
-<div id="loadingOverlay"></div>
-<div id="empty">Không tìm thấy sản phẩm nào</div>
+<div id="empty">Rất tiếc, hiện không có sản phẩm flash sale nào.</div>
 <div class="grid" id="grid"></div>
-<div class="sentinel" id="sentinel"></div>
-<button id="more-btn">Xem thêm</button>
-<button class="back-top" id="backToTop">↑</button>
 
-<!-- Affiliate block -->
-<div class="aff-block" style="max-width:var(--max);margin:20px auto 0;padding:0 14px 40px;">
+<div class="aff-block" style="max-width:var(--max);margin:20px auto 40px;padding:0 14px;">
   <div style="background:var(--brand-light);border:1.5px solid rgba(238,77,45,0.2);border-radius:14px;padding:16px;text-align:center;">
-    <p class="aff-eyebrow">✨ Mua sắm thêm</p>
+    <p class="aff-eyebrow">✨ Săn thêm nhiều deal hot</p>
     <a class="aff-cta"
-       href="https://s.shopee.vn/an_redir?affiliate_id=17327330054&sub_id=xue-banner-flashsale&origin_link=https%3A%2F%2Fshopee.vn%2Fflash_sale"
+       href="https://s.shopee.vn/an_redir?affiliate_id=17327330054&sub_id=xue-banner-fs&origin_link=https%3A%2F%2Fshopee.vn%2Fflash_sale"
        target="_blank" rel="noopener sponsored">
-      ⚡ Xem tất cả Flash Sale trên Shopee
+      ⚡ Xem trang Flash Sale Shopee
     </a>
-    <p class="aff-legal">Liên kết tiếp thị liên kết. Bạn không mất thêm chi phí.</p>
   </div>
 </div>
 
 <footer class="site-footer">
-  <p>© 2025 XU Ế · Tổng hợp vòng quay Shopee Live · Không thuộc Shopee</p>
+  <p>© 2025 XU Ế · Tổng hợp Flash Sale Shopee · Không thuộc Shopee</p>
 </footer>
 
 <script>
-const PROMO_API = "https://sharelink-kappa.vercel.app/promotions";
-const API_BASE   = "https://sharelink-kappa.vercel.app/flash_sale";
-const IMG_BASE   = "https://cf.shopee.vn/file/";
-const AFF_ID     = "17327330054";
-
-function affWrap(url, subId = "xue-fs-item") {
-  if (!url) return "#";
-  const encoded = encodeURIComponent(url);
-  return `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=${subId}&origin_link=${encoded}`;
-}
+const AFF_ID = "17327330054";
+// Sử dụng API dự phòng ổn định hơn
+const PROMO_API = "https://script.google.com/macros/s/AKfycbyobr7LWkEQjy0Kvu-_eRoTgTG-aWEPC8Lk81l6pIYar85KIz1BoZfYijcp3zjghvYhPA/exec?type=promotions";
+const FLASH_API = "https://script.google.com/macros/s/AKfycbyobr7LWkEQjy0Kvu-_eRoTgTG-aWEPC8Lk81l6pIYar85KIz1BoZfYijcp3zjghvYhPA/exec?type=flash_sale";
 
 let state = {
   promotions: [],
   currentPid: null,
-  items: [],
-  page: 1,
-  loading: false,
-  ended: false,
-  keyword: "",
-  sortField: "price",
-  sortOrder: 1
+  allData: [],
+  loading: false
 };
 
 const grid = document.getElementById('grid');
 const emptyEl = document.getElementById('empty');
 const promoBar = document.getElementById('promoBar');
 const countdownEl = document.getElementById('countdown');
-const moreBtn = document.getElementById('more-btn');
+const loadEl = document.getElementById('loading');
+
+function affWrap(url, subId = "xue-fs") {
+  if (!url) return "#";
+  return `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=${subId}&origin_link=${encodeURIComponent(url)}`;
+}
 
 async function init() {
+  loadEl.style.display = 'block';
   try {
     const res = await fetch(PROMO_API);
     state.promotions = await res.json();
-    renderPromotions();
     
-    // Auto select promotion
-    const now = Math.floor(Date.now() / 1000);
-    const current = state.promotions.find(p => now >= p.start_time && now < p.end_time) || state.promotions[0];
-    if (current) {
-      selectPromotion(current.promotionid);
+    if (!state.promotions || state.promotions.length === 0) {
+        // Fallback slots if API fails
+        const now = new Date();
+        const startH = Math.floor(now.getHours() / 2) * 2;
+        state.promotions = Array.from({length: 6}, (_, i) => {
+            const h = (startH + i * 2) % 24;
+            const start = new Date(now); start.setHours(h, 0, 0, 0);
+            if (h < startH) start.setDate(start.getDate() + 1);
+            return {
+                promotionid: h,
+                start_time: Math.floor(start.getTime() / 1000),
+                end_time: Math.floor(start.getTime() / 1000) + 7200
+            };
+        });
     }
+
+    renderPromotions();
+    const nowTs = Math.floor(Date.now() / 1000);
+    const current = state.promotions.find(p => nowTs >= p.start_time && nowTs < p.end_time) || state.promotions[0];
+    selectPromotion(current.promotionid);
   } catch (e) {
     console.error(e);
     emptyEl.style.display = 'block';
-    emptyEl.textContent = "Hệ thống đang bảo trì. Vui lòng quay lại sau!";
+  } finally {
+    loadEl.style.display = 'none';
   }
 }
 
 function renderPromotions() {
   promoBar.innerHTML = '';
+  const now = Math.floor(Date.now() / 1000);
+  
   state.promotions.forEach(p => {
     const btn = document.createElement('button');
     btn.className = 'promo-btn' + (state.currentPid == p.promotionid ? ' active' : '');
+    
     const date = new Date(p.start_time * 1000);
-    btn.textContent = date.getHours().toString().padStart(2, '0') + ':00';
+    const timeStr = date.getHours().toString().padStart(2, '0') + ':00';
+    
+    let status = "Sắp diễn ra";
+    if (now >= p.start_time && now < p.end_time) status = "Đang diễn ra";
+    else if (now >= p.end_time) status = "Đã kết thúc";
+
+    btn.innerHTML = `<span class="time">${timeStr}</span><span class="status">${status}</span>`;
     btn.onclick = () => selectPromotion(p.promotionid);
     promoBar.appendChild(btn);
   });
 }
 
-function selectPromotion(pid) {
+async function selectPromotion(pid) {
   state.currentPid = pid;
-  state.page = 1;
-  state.ended = false;
-  grid.innerHTML = '';
   renderPromotions();
-  fetchItems();
   updateCountdown();
+  fetchFlashSale(pid);
 }
 
-async function fetchItems() {
-  if (state.loading || state.ended) return;
-  state.loading = true;
+async function fetchFlashSale(pid) {
+  grid.innerHTML = '';
+  loadEl.style.display = 'block';
+  emptyEl.style.display = 'none';
   
-  // Show skeleton
-  for(let i=0; i<8; i++) grid.appendChild(createSkeleton());
-
   try {
-    const url = `${API_BASE}?promotionid=${state.currentPid}&page_number=${state.page}&keyword=${state.keyword}&sort_field=${state.sortField}&sort_order=${state.sortOrder}`;
-    const res = await fetch(url, { headers: { 'X-tss': '123456' } });
-    
-    if (!res.ok) throw new Error("API Error");
-    
+    // Gọi API lấy sản phẩm
+    const res = await fetch(`${FLASH_API}&pid=${pid}`);
     const data = await res.json();
-    
-    // Remove skeletons
-    grid.querySelectorAll('.skeleton-card').forEach(el => el.remove());
-
-    if (!data || data.length === 0) {
-      state.ended = true;
-      if (state.page === 1) emptyEl.style.display = 'block';
-    } else {
-      emptyEl.style.display = 'none';
-      data.forEach(item => {
-        // Decode ID logic from original obfuscated code
-        if (item.i && item.y && item.t) {
-          item.i = Math.round((item.i - 65756.757 + item.y + item.t) / 2.15);
-        }
-        grid.appendChild(createItemCard(item));
-      });
-      if (data.length < 10) state.ended = true;
-    }
-    
-    moreBtn.style.display = state.ended ? 'none' : 'block';
+    state.allData = data || [];
+    renderGrid(state.allData);
   } catch (e) {
     console.error(e);
-    grid.querySelectorAll('.skeleton-card').forEach(el => el.remove());
-    if (state.page === 1) {
-      emptyEl.style.display = 'block';
-      emptyEl.textContent = "Không thể tải sản phẩm. Có thể Server đang quá tải!";
-    }
+    emptyEl.style.display = 'block';
   } finally {
-    state.loading = false;
+    loadEl.style.display = 'none';
   }
 }
 
-function createItemCard(item) {
-  const card = document.createElement('a');
-  card.className = 'card';
-  const shopId = item.t;
-  const itemId = item.i;
-  const rawUrl = `https://shopee.vn/product/${shopId}/${itemId}`;
-  card.href = affWrap(rawUrl);
-  card.target = "_blank";
+function renderGrid(data) {
+  grid.innerHTML = '';
+  if (!data || data.length === 0) {
+    emptyEl.style.display = 'block';
+    return;
+  }
+  
+  data.forEach(item => {
+    const card = document.createElement('a');
+    card.className = 'card';
+    const rawUrl = `https://shopee.vn/product/${item.shopid}/${item.itemid}`;
+    card.href = affWrap(rawUrl);
+    card.target = "_blank";
+    
+    const discount = item.discount || Math.round((1 - item.price / item.price_before_discount) * 100);
+    const percent = Math.min(100, Math.round((item.flash_sale_stock - item.stock) / item.flash_sale_stock * 100) || 0);
 
-  card.innerHTML = `
-    <div class="thumb">
-      <img src="${IMG_BASE}${item.image}" loading="lazy">
-      ${item.discount ? `<div class="badge">-${item.discount}%</div>` : ''}
-    </div>
-    <div class="content">
-      <div class="name">${item.name}</div>
-      <div class="price">
-        <span class="now">${(item.price/100000).toLocaleString()}đ</span>
-        ${item.price_before_discount ? `<span class="before">${(item.price_before_discount/100000).toLocaleString()}đ</span>` : ''}
+    card.innerHTML = `
+      <div class="thumb">
+        <img src="https://cf.shopee.vn/file/${item.image}" loading="lazy">
+        ${discount > 0 ? `<div class="badge">-${discount}%</div>` : ''}
       </div>
-      <div class="stock">Còn: ${item.stock || 0}/${item.flash_sale_stock || 0}</div>
-    </div>
-  `;
-  return card;
-}
-
-function createSkeleton() {
-  const div = document.createElement('div');
-  div.className = 'card skeleton-card';
-  div.innerHTML = `
-    <div class="thumb skeleton"></div>
-    <div class="content">
-      <div class="skeleton" style="height:14px; margin-bottom:8px"></div>
-      <div class="skeleton" style="height:20px; width:60%"></div>
-    </div>
-  `;
-  return div;
+      <div class="content">
+        <div class="name">${item.name}</div>
+        <div class="price">
+          <span class="now">${(item.price / 100000).toLocaleString()}đ</span>
+          ${item.price_before_discount ? `<span class="before">${(item.price_before_discount / 100000).toLocaleString()}đ</span>` : ''}
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar" style="width: ${percent}%"></div>
+          <div class="progress-text">${percent < 10 ? 'ĐANG BÁN CHẠY' : `ĐÃ BÁN ${percent}%`}</div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
 }
 
 function updateCountdown() {
   const promo = state.promotions.find(p => p.promotionid == state.currentPid);
   if (!promo) return;
   
+  if (window.timerInterval) clearInterval(window.timerInterval);
+  
   const tick = () => {
     const now = Math.floor(Date.now() / 1000);
-    let diff = promo.start_time - now;
-    let prefix = "Bắt đầu sau: ";
-    
-    if (now >= promo.start_time) {
+    let diff = 0;
+    let label = "";
+
+    if (now < promo.start_time) {
+      diff = promo.start_time - now;
+      label = "Bắt đầu sau";
+    } else if (now < promo.end_time) {
       diff = promo.end_time - now;
-      prefix = "Kết thúc sau: ";
-    }
-    
-    if (diff <= 0) {
+      label = "Kết thúc sau";
+    } else {
       countdownEl.textContent = "Chương trình đã kết thúc";
       return;
     }
-    
+
     const h = Math.floor(diff / 3600);
     const m = Math.floor((diff % 3600) / 60);
     const s = diff % 60;
-    countdownEl.textContent = prefix + `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    countdownEl.textContent = `${label} ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
   };
   
-  setInterval(tick, 1000);
+  window.timerInterval = setInterval(tick, 1000);
   tick();
 }
 
 document.getElementById('searchBtn').onclick = () => {
-  state.keyword = document.getElementById('kw').value;
-  state.page = 1;
-  state.ended = false;
-  grid.innerHTML = '';
-  fetchItems();
-};
-
-moreBtn.onclick = () => {
-  state.page++;
-  fetchItems();
+  const kw = document.getElementById('kw').value.toLowerCase();
+  const filtered = state.allData.filter(i => i.name.toLowerCase().includes(kw));
+  renderGrid(filtered);
 };
 
 init();
