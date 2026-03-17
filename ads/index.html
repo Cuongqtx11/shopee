@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XU Ế — Gian Hàng Tài Trợ</title>
+  <meta property="og:title" content="XU Ế — Gian Hàng Tài Trợ">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="/">
+      <span class="logo-emoji">🎡</span>
+      <span class="logo-text">XU Ế</span>
+    </a>
+    <nav class="nav">
+      <a class="nav-link" href="/">Vòng quay</a>
+      <a class="nav-link" href="/tui">Túi quà</a>
+      <a class="nav-link" href="/flashsale">Flash Sale</a>
+      <a class="nav-link" href="/live">Live</a>
+    </nav>
+    <a class="tele-btn" href="https://t.me/shopeelivexucoin" target="_blank" rel="noopener">💬 Telegram</a>
+  </div>
+</header>
+
+<div class="header">
+  <div class="store-info">
+    <div class="store-logo" id="store-logo">
+      <div class="image-fallback">SOON</div>
+    </div>
+    <div class="store-details">
+      <h1 id="store-name">...</h1>
+      <div class="store-rating">
+        <span class="shopee-badge">Shopee Mall</span>
+        <div class="rating-item">
+          <span class="star">★</span>
+          <span class="rating-number" id="store-rating">...</span>
+        </div>
+        <span class="followers" id="store-followers">Người theo dõi ...</span>
+      </div>
+    </div>
+  </div>
+  <a class="header-button" id="store-link" href="#">Xem trên app</a>
+</div>
+
+<div class="description" id="store-description">...</div>
+
+<div class="products-container">
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    Đang tải sản phẩm...
+  </div>
+  <div id="products-list"></div>
+</div>
+
+<div class="description">
+  <p>Trang này có chứa nội dung tài trợ. Việc bạn lựa chọn mua sản phẩm thông qua liên kết trên website là hoàn toàn tự nguyện, nhưng sẽ góp phần giúp chúng tôi có thêm kinh phí duy trì và phát triển cộng đồng XU Ế.</p>
+  <div class="home-button">
+    <a class="header-button" href="/">TRANG CHỦ XU Ế</a>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>© 2025 XU Ế · Tổng hợp vòng quay Shopee Live · Không thuộc Shopee</p>
+</footer>
+
+<script>
+const AFF_ID = "17327330054";
+const DATA_FILE = "./data/unilever.json";
+
+function affLink(originalUrl) {
+  if (!originalUrl) return "#";
+  // Thay affiliate ID cũ nếu có, hoặc wrap link mới
+  if (originalUrl.includes("utm_source=an_")) {
+    return originalUrl.replace(/utm_source=an_\d+/, `utm_source=an_${AFF_ID}`);
+  }
+  return originalUrl;
+}
+
+function createImageElement(src, alt, fallbackText) {
+  const img = document.createElement("img");
+  img.src = src; img.alt = alt;
+  img.onerror = function() {
+    this.style.display = "none";
+    const fb = document.createElement("div");
+    fb.className = "image-fallback"; fb.textContent = fallbackText;
+    this.parentNode.appendChild(fb);
+  };
+  return img;
+}
+
+async function loadData() {
+  try {
+    const res  = await fetch(DATA_FILE);
+    const data = await res.json();
+    const { store, products } = data;
+
+    // Store info
+    const logoEl = document.getElementById("store-logo");
+    logoEl.innerHTML = "";
+    logoEl.appendChild(createImageElement(store.logo, store.name, "LOGO"));
+
+    document.getElementById("store-name").textContent     = store.name;
+    document.getElementById("store-rating").textContent   = store.rating;
+    document.getElementById("store-followers").textContent= `Người theo dõi: ${store.followers}`;
+    document.getElementById("store-description").textContent = store.description;
+
+    const storeLink = document.getElementById("store-link");
+    storeLink.href = affLink(store.link);
+
+    // Products
+    document.getElementById("loading").style.display = "none";
+    const list = document.getElementById("products-list");
+    list.innerHTML = "";
+
+    products.forEach(p => {
+      const card = document.createElement("a");
+      card.className = "product-card";
+      card.href   = affLink(p.link);
+      card.target = "_blank";
+      card.rel    = "noopener noreferrer sponsored";
+      card.innerHTML = `
+        <div class="product-image-container">
+          <img loading="lazy" src="${p.image}" alt="${p.title}" onerror="this.src='https://cf.shopee.vn/file/default_img'">
+        </div>
+        <div class="product-info">
+          <div class="product-title">${p.title}</div>
+          <div class="product-price">${p.price}</div>
+          <div class="product-meta">
+            <span class="product-rating">★ ${p.rating}</span>
+            <span class="product-sold">${p.sold}</span>
+          </div>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  } catch(e) {
+    console.error(e);
+    document.getElementById("loading").textContent = "⚠️ Lỗi tải dữ liệu.";
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
