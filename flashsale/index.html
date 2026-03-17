@@ -117,18 +117,17 @@
 
 <script>
 const AFF_ID = "17327330054";
-// Sử dụng API ổn định từ Google Apps Script (GAS) chuyên dụng cho Flash Sale
-const API_URL = "https://script.google.com/macros/s/AKfycbz_KqB6p-fF-zF8A7y0xO4p6G5_T5_T5_T5_T5_T5_T5_T5/exec"; // Dummy URL, will update to a working one or logic
-
-// Vì hiện tại các API đều có thể bị chặn, tôi sẽ sử dụng logic lấy trực tiếp qua proxy ổn định nhất có thể
-// Hoặc sử dụng nguồn dữ liệu từ shopeelive.me (thông qua proxy)
-const DATA_SOURCE = "https://sharelink-kappa.vercel.app/flash_sale"; 
+const PROMOTIONS_URL = "https://sharelink-kappa.vercel.app/promotions";
+const FLASHSALE_URL = "https://sharelink-kappa.vercel.app/flash_sale";
+const FALLBACK_FILE = "./fallback-products.json";
 
 let state = {
   promotions: [],
   currentPid: null,
   allData: [],
-  loading: false
+  loading: false,
+  usingFallback: false,
+  keyword: ""
 };
 
 const grid = document.getElementById('grid');
@@ -136,36 +135,81 @@ const emptyEl = document.getElementById('empty');
 const promoBar = document.getElementById('promoBar');
 const countdownEl = document.getElementById('countdown');
 const loadEl = document.getElementById('loading');
+const kwInput = document.getElementById('kw');
+const searchBtn = document.getElementById('searchBtn');
 
 function affWrap(url, subId = "xue-fs") {
   if (!url) return "#";
+  if (url.includes("affiliate_id=")) {
+    return url.replace(/affiliate_id=\d+/, `affiliate_id=${AFF_ID}`);
+  }
   return `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=${subId}&origin_link=${encodeURIComponent(url)}`;
+}
+
+function formatPrice(value) {
+  const n = Number(value) || 0;
+  if (!n) return "0đ";
+  return `${n.toLocaleString('vi-VN')}đ`;
+}
+
+function normalizeItem(item) {
+  const shopId = item?.t || item?.shop_id || item?.shopid || item?.shopId || null;
+  const itemId = item?.itemid || item?.item_id || item?.itemId || (item?.i && item?.y && item?.t
+    ? Math.round((item.i - 65756.757 + item.y + item.t) / 2.15)
+    : null);
+  const image = item?.image_url || item?.image || item?.item_image || "";
+  const imageUrl = image && image.startsWith('http') ? image : (image ? `https://cf.shopee.vn/file/${image}` : '');
+  const productUrl = item?.product_url || item?.link || item?.url || (shopId && itemId ? `https://shopee.vn/product/${shopId}/${itemId}` : "https://shopee.vn/flash_sale");
+  const price = Number(item?.price || 0);
+  const before = Number(item?.price_before_discount || item?.priceBeforeDiscount || 0);
+  const percent = item?.flash_sale_stock && item?.stock >= 0
+    ? Math.min(100, Math.max(1, Math.round(((item.flash_sale_stock - item.stock) / item.flash_sale_stock) * 100)))
+    : Number(item?.sold_percent || item?.soldPercent || 12) || 12;
+
+  return {
+    name: item?.name || item?.title || 'Sản phẩm Shopee',
+    price: price > 100000 ? Math.round(price / 100000) : price,
+    priceBeforeDiscount: before > 100000 ? Math.round(before / 100000) : before,
+    discount: Number(item?.discount || 0),
+    imageUrl,
+    productUrl,
+    soldPercent: percent
+  };
+}
+
+function getFilteredData() {
+  const keyword = state.keyword.trim().toLowerCase();
+  if (!keyword) return state.allData;
+  return state.allData.filter(item => (item.name || '').toLowerCase().includes(keyword));
 }
 
 async function init() {
   loadEl.style.display = 'block';
   try {
-    // Lấy khung giờ
-    const res = await fetch("https://sharelink-kappa.vercel.app/promotions");
+    const res = await fetch(PROMOTIONS_URL);
     state.promotions = await res.json();
-    
-    if (!state.promotions || state.promotions.length === 0) {
-        // Fallback slots
-        const now = new Date();
-        const slots = [0, 9, 12, 15, 18, 21];
-        state.promotions = slots.map(h => {
-            let d = new Date(now); d.setHours(h, 0, 0, 0);
-            return { promotionid: h, start_time: Math.floor(d.getTime() / 1000), end_time: Math.floor(d.getTime() / 1000) + 10800 };
-        });
+
+    if (!Array.isArray(state.promotions) || state.promotions.length === 0) {
+      const now = new Date();
+      const slots = [0, 9, 12, 15, 18, 21];
+      state.promotions = slots.map(h => {
+        const d = new Date(now);
+        d.setHours(h, 0, 0, 0);
+        return {
+          promotionid: h,
+          start_time: Math.floor(d.getTime() / 1000),
+          end_time: Math.floor(d.getTime() / 1000) + 10800
+        };
+      });
     }
 
     renderPromotions();
     const nowTs = Math.floor(Date.now() / 1000);
     const current = state.promotions.find(p => nowTs >= p.start_time && nowTs < p.end_time) || state.promotions[0];
-    selectPromotion(current.promotionid);
+    await selectPromotion(current.promotionid);
   } catch (e) {
     console.error(e);
-    emptyEl.style.display = 'block';
+    await loadFallbackProducts();
   } finally {
     loadEl.style.display = 'none';
   }
@@ -179,74 +223,89 @@ function renderPromotions() {
     btn.className = 'promo-btn' + (state.currentPid == p.promotionid ? ' active' : '');
     const date = new Date(p.start_time * 1000);
     const timeStr = date.getHours().toString().padStart(2, '0') + ':00';
-    let status = now >= p.start_time && now < p.end_time ? "Đang diễn ra" : (now < p.start_time ? "Sắp diễn ra" : "Đã kết thúc");
+    const status = now >= p.start_time && now < p.end_time ? 'Đang diễn ra' : (now < p.start_time ? 'Sắp diễn ra' : 'Đã kết thúc');
     btn.innerHTML = `<span class="time">${timeStr}</span><span class="status">${status}</span>`;
     btn.onclick = () => selectPromotion(p.promotionid);
     promoBar.appendChild(btn);
   });
 }
 
-function selectPromotion(pid) {
+async function selectPromotion(pid) {
   state.currentPid = pid;
   renderPromotions();
   updateCountdown();
-  fetchFlashSale(pid);
+  await fetchFlashSale(pid);
 }
 
 async function fetchFlashSale(pid) {
   grid.innerHTML = '';
   loadEl.style.display = 'block';
   emptyEl.style.display = 'none';
-  
+
   try {
-    // Tôi sử dụng nguồn dự phòng từ một server API săn xu khác rất ổn định
-    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://sharelink-kappa.vercel.app/flash_sale?promotionid=' + pid)}`);
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`${FLASHSALE_URL}?promotionid=${pid}`)}`;
+    const res = await fetch(proxyUrl);
     const raw = await res.json();
-    const data = JSON.parse(raw.contents);
-    
-    if (data && data.length > 0) {
-        state.allData = data;
-        renderGrid(state.allData);
+    const data = JSON.parse(raw.contents || '[]');
+    const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
+
+    if (normalized.length > 0) {
+      state.usingFallback = false;
+      state.allData = normalized;
+      renderGrid(getFilteredData());
     } else {
-        throw new Error("No data");
+      await loadFallbackProducts();
     }
   } catch (e) {
-    console.error("Flash API Error:", e);
-    // Nếu vẫn lỗi, hiển thị thông báo hỗ trợ
-    emptyEl.style.display = 'block';
-    emptyEl.innerHTML = `Hệ thống Flash Sale đang quá tải dữ liệu. <br><br> <a href="${affWrap('https://shopee.vn/flash_sale')}" class="btn" style="text-decoration:none">Xem trực tiếp trên Shopee</a>`;
+    console.error('Flash API Error:', e);
+    await loadFallbackProducts();
   } finally {
     loadEl.style.display = 'none';
   }
 }
 
+async function loadFallbackProducts() {
+  const res = await fetch(FALLBACK_FILE, { cache: 'no-store' });
+  const data = await res.json();
+  state.usingFallback = true;
+  state.allData = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
+  renderGrid(getFilteredData());
+}
+
 function renderGrid(data) {
   grid.innerHTML = '';
+
+  if (!data.length) {
+    emptyEl.style.display = 'block';
+    emptyEl.innerHTML = state.usingFallback
+      ? `Chưa tìm thấy sản phẩm phù hợp. <br><br><a href="${affWrap('https://shopee.vn/flash_sale')}" class="btn" style="text-decoration:none">Xem Flash Sale trên Shopee</a>`
+      : `Rất tiếc, hiện không có sản phẩm flash sale nào.`;
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+
   data.forEach(item => {
     const card = document.createElement('a');
     card.className = 'card';
-    const shopId = item.t;
-    const itemId = Math.round((item.i - 65756.757 + item.y + item.t) / 2.15);
-    const rawUrl = `https://shopee.vn/product/${shopId}/${itemId}`;
-    card.href = affWrap(rawUrl);
-    card.target = "_blank";
-    
-    const percent = Math.min(100, Math.round((item.flash_sale_stock - item.stock) / item.flash_sale_stock * 100) || 10);
+    card.href = affWrap(item.productUrl);
+    card.target = '_blank';
+    card.rel = 'noopener sponsored';
 
     card.innerHTML = `
       <div class="thumb">
-        <img src="https://cf.shopee.vn/file/${item.image}" loading="lazy">
+        <img src="${item.imageUrl}" loading="lazy" alt="${item.name.replace(/"/g, '&quot;')}">
         ${item.discount > 0 ? `<div class="badge">-${item.discount}%</div>` : ''}
       </div>
       <div class="content">
         <div class="name">${item.name}</div>
         <div class="price">
-          <span class="now">${(item.price / 100000).toLocaleString()}đ</span>
-          ${item.price_before_discount ? `<span class="before">${(item.price_before_discount / 100000).toLocaleString()}đ</span>` : ''}
+          <span class="now">${formatPrice(item.price)}</span>
+          ${item.priceBeforeDiscount ? `<span class="before">${formatPrice(item.priceBeforeDiscount)}</span>` : ''}
         </div>
         <div class="progress-wrap">
-          <div class="progress-bar" style="width: ${percent}%"></div>
-          <div class="progress-text">${percent < 20 ? 'SẮP CHÁY HÀNG' : `ĐÃ BÁN ${percent}%`}</div>
+          <div class="progress-bar" style="width: ${item.soldPercent}%"></div>
+          <div class="progress-text">${item.soldPercent < 20 ? 'DEAL HOT' : `ĐÃ BÁN ${item.soldPercent}%`}</div>
         </div>
       </div>
     `;
@@ -256,18 +315,38 @@ function renderGrid(data) {
 
 function updateCountdown() {
   const promo = state.promotions.find(p => p.promotionid == state.currentPid);
-  if (!promo) return;
+  if (!promo) {
+    countdownEl.textContent = state.usingFallback ? 'Đang hiển thị dữ liệu dự phòng' : 'Đang tải...';
+    return;
+  }
   if (window.timerInterval) clearInterval(window.timerInterval);
   const tick = () => {
     const now = Math.floor(Date.now() / 1000);
-    let diff = now < promo.start_time ? promo.start_time - now : promo.end_time - now;
-    let label = now < promo.start_time ? "Bắt đầu sau" : "Kết thúc sau";
-    if (diff <= 0) { countdownEl.textContent = "Hết khung giờ"; return; }
-    const h = Math.floor(diff / 3600); const m = Math.floor((diff % 3600) / 60); const s = diff % 60;
+    const diff = now < promo.start_time ? promo.start_time - now : promo.end_time - now;
+    const label = now < promo.start_time ? 'Bắt đầu sau' : 'Kết thúc sau';
+    if (diff <= 0) {
+      countdownEl.textContent = state.usingFallback ? 'Đang hiển thị dữ liệu dự phòng' : 'Hết khung giờ';
+      return;
+    }
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
     countdownEl.textContent = `${label} ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
   };
-  window.timerInterval = setInterval(tick, 1000); tick();
+  window.timerInterval = setInterval(tick, 1000);
+  tick();
 }
+
+function handleSearch() {
+  state.keyword = kwInput.value || '';
+  renderGrid(getFilteredData());
+}
+
+searchBtn.addEventListener('click', handleSearch);
+kwInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') handleSearch();
+});
+kwInput.addEventListener('input', handleSearch);
 
 init();
 </script>
