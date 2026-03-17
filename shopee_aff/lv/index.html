@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<title>Shopee Live Formatter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+
+<style>
+  * {
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #6c5ce7, #00b894);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 460px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.15);
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  p {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 16px;
+  }
+
+  /* ✅ FIX INPUT CSS */
+  input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    margin-bottom: 10px;
+    outline: none;
+  }
+
+  input:focus {
+    border-color: #6c5ce7;
+  }
+
+  .checkbox-group {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: #6c5ce7;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .result {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    white-space: pre-line;
+  }
+
+  .hidden { display: none; }
+
+  .success {
+    background: #f7f8ff;
+    border: 1px solid #dfe3ff;
+  }
+
+  .error {
+    background: #fff5f5;
+    border: 1px solid #ffd6d6;
+    color: #c0392b;
+  }
+
+  .copy-btn {
+    margin-top: 10px;
+    background: #00b894;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Shopee Live Formatter</h1>
+  <p>Tự động format – không reload</p>
+
+  <input id="inputLink" placeholder="Dán link Shopee Live..." />
+  <input id="inputMsg" placeholder="Tin nhắn (1 dòng)..." />
+
+  <div class="checkbox-group">
+    <label><input type="checkbox" id="chkLike">❤️</label>
+    <label><input type="checkbox" id="chkShare">share</label>
+  </div>
+
+  <button onclick="fetchLive()">Tạo nội dung</button>
+
+  <div id="result" class="result hidden"></div>
+  <button id="copyBtn" class="copy-btn hidden" onclick="copyText()">Copy</button>
+</div>
+
+<script>
+let liveData = null;
+
+function nowTime() {
+  return new Date().toLocaleTimeString("vi-VN", { hour12: false });
+}
+
+function renderText() {
+  if (!liveData) return;
+
+  const msg = document.getElementById("inputMsg").value.trim();
+  const like = document.getElementById("chkLike").checked;
+  const share = document.getElementById("chkShare").checked;
+
+  const lines = [
+    `🚨 ${liveData.nickname} 🚨`,
+    msg,
+    liveData.link
+  ];
+
+  // ✅ CHỈ THÊM DÒNG NÀY KHI CÓ CHECKBOX
+  if (like || share) {
+    const parts = [];
+    if (like) parts.push(`${liveData.like_cnt} tim`);
+    if (share) parts.push(`${liveData.share_cnt} share`);
+    lines.push(`Đang ${parts.join(", ")}`);
+  }
+
+  lines.push(`${nowTime()} - ${liveData.viewer_count} mắt xem`);
+
+  const result = document.getElementById("result");
+  result.className = "result success";
+  result.textContent = lines.filter(Boolean).join("\n");
+}
+
+async function fetchLive() {
+  const link = document.getElementById("inputLink").value.trim();
+  const result = document.getElementById("result");
+
+  if (!link) {
+    result.className = "result error";
+    result.textContent = "⚠️ Vui lòng nhập link";
+    result.classList.remove("hidden");
+    return;
+  }
+
+  result.className = "result";
+  result.textContent = "⏳ Đang xử lý...";
+  result.classList.remove("hidden");
+
+  try {
+    const res = await fetch("https://sharelink-kappa.vercel.app/get_link_live", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ link })
+    });
+
+    liveData = await res.json();
+    renderText();
+    document.getElementById("copyBtn").classList.remove("hidden");
+
+  } catch {
+    result.className = "result error";
+    result.textContent = "❌ Lỗi lấy dữ liệu";
+  }
+}
+
+function copyText() {
+  navigator.clipboard.writeText(
+    document.getElementById("result").textContent
+  );
+}
+
+// auto update
+["chkLike", "chkShare"].forEach(id =>
+  document.getElementById(id).addEventListener("change", renderText)
+);
+document.getElementById("inputMsg").addEventListener("input", renderText);
+</script>
+
+</body>
+</html>

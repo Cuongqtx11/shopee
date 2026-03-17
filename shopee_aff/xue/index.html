@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>XU Ế — Cộng Đồng Zalo 📱</title>
+  <meta name="description" content="Tham gia cộng đồng Xu Ế trên Zalo để nhận thông báo live xu miễn phí!">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .hero { background: linear-gradient(135deg, #0068FF 0%, #0091FF 60%, #00C6FF 100%); }
+    .zalo-grid {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .zalo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: var(--shadow);
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+    .zalo-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,104,255,0.15);
+    }
+    .zalo-icon {
+      width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #0068FF, #0091FF);
+      color: #fff; font-size: 14px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .zalo-info { flex: 1; }
+    .zalo-name { font-size: 15px; font-weight: 700; color: var(--text); }
+    .zalo-members { font-size: 12px; color: var(--text-2); font-weight: 600; margin-top: 2px; }
+    .zalo-btn {
+      background: #0068FF; color: #fff;
+      font-size: 12px; font-weight: 800;
+      padding: 8px 14px; border-radius: 20px;
+      border: none; cursor: pointer; flex-shrink: 0;
+      font-family: var(--font);
+      transition: background 0.12s;
+    }
+    .zalo-btn:hover { background: #0057D4; }
+    .note-box {
+      background: #EBF2FF; border: 1px solid #BFDBFE;
+      border-radius: var(--r); padding: 14px 16px;
+      font-size: 13px; font-weight: 600; color: #1E40AF;
+      margin-bottom: 16px; line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="/">
+      <span class="logo-emoji">🎡</span>
+      <span class="logo-text">XU Ế</span>
+    </a>
+    <nav class="nav">
+      <a class="nav-link" href="/">Vòng quay</a>
+      <a class="nav-link" href="/tui">Túi quà</a>
+      <a class="nav-link" href="/flashsale">Flash Sale</a>
+      <a class="nav-link" href="/live">Live</a>
+    </nav>
+    <a class="tele-btn" href="https://t.me/shopeelivexucoin" target="_blank" rel="noopener">💬 Telegram</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h1 class="hero-title">Cộng Đồng <span class="hl">Xu Ế</span> 📱</h1>
+    <p class="hero-sub">Vào nhóm Zalo để nhận thông báo ngay khi có live xu mới!</p>
+  </div>
+</div>
+
+<main class="main">
+  <div class="note-box">
+    📌 Mỗi nhóm tối đa 999 thành viên. Nếu nhóm đầy, hãy thử nhóm khác. Nhóm có số cao hơn là nhóm mới nhất!
+  </div>
+
+  <div class="list-hd" style="margin-bottom:14px;">
+    <span class="cnt-badge">12</span>
+    <span class="hd-label">nhóm Zalo đang hoạt động</span>
+  </div>
+
+  <div class="zalo-grid">
+    <div class="zalo-card" onclick="openGroup('group12')">
+      <div class="zalo-icon">Z12</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 12 🔥</div>
+        <div class="zalo-members">👥 Nhóm mới nhất · ~56 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group11')">
+      <div class="zalo-icon">Z11</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 11 🔥</div>
+        <div class="zalo-members">👥 999 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group10')">
+      <div class="zalo-icon">Z10</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 10 🔥</div>
+        <div class="zalo-members">👥 995 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group9')">
+      <div class="zalo-icon">Z9</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 9 🔥</div>
+        <div class="zalo-members">👥 998 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group8')">
+      <div class="zalo-icon">Z8</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 8 🔥</div>
+        <div class="zalo-members">👥 999 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group7')">
+      <div class="zalo-icon">Z7</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 7 🔥</div>
+        <div class="zalo-members">👥 999 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group6')">
+      <div class="zalo-icon">Z6</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 6 🔥</div>
+        <div class="zalo-members">👥 999 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group5')">
+      <div class="zalo-icon">Z5</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 5 🔥</div>
+        <div class="zalo-members">👥 998 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group4')">
+      <div class="zalo-icon">Z4</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 4 🔥</div>
+        <div class="zalo-members">👥 999 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group3')">
+      <div class="zalo-icon">Z3</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 3 🔥</div>
+        <div class="zalo-members">👥 998 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group2')">
+      <div class="zalo-icon">Z2</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 2 🔥</div>
+        <div class="zalo-members">👥 998 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+    <div class="zalo-card" onclick="openGroup('group1')">
+      <div class="zalo-icon">Z1</div>
+      <div class="zalo-info">
+        <div class="zalo-name">Nhóm Xu Ế 1 🔥</div>
+        <div class="zalo-members">👥 999 thành viên</div>
+      </div>
+      <button class="zalo-btn">Tham gia</button>
+    </div>
+  </div>
+
+  <!-- Cũng chia sẻ Telegram -->
+  <div class="aff-block" style="margin-top:20px;text-align:center;">
+    <p class="aff-eyebrow">📣 Còn có nhóm Telegram</p>
+    <a class="aff-cta" href="https://t.me/shopeelivexucoin" target="_blank" rel="noopener">
+      Tham gia kênh Telegram
+    </a>
+    <p class="aff-legal">Nhận thông báo tức thì khi có xu mới trên Shopee Live</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>© 2025 XU Ế · Tổng hợp vòng quay Shopee Live · Không thuộc Shopee</p>
+</footer>
+
+<script>
+const GROUPS = {
+  group1:  'https://zalo.me/g/hkzxgr743',
+  group2:  'https://zalo.me/g/mjcdta210',
+  group3:  'https://zalo.me/g/ifwmmn944',
+  group4:  'https://zalo.me/g/ipztqe451',
+  group5:  'https://zalo.me/g/ktanmv365',
+  group6:  'https://zalo.me/g/dbwwnp254',
+  group7:  'https://zalo.me/g/xtnids646',
+  group8:  'https://zalo.me/g/yqgxzp600',
+  group9:  'https://zalo.me/g/wexnvh164',
+  group10: 'https://zalo.me/g/xaobtn449',
+  group11: 'https://zalo.me/g/piibpw191',
+  group12: 'https://zalo.me/g/pmxbhu210',
+};
+function openGroup(id) {
+  if (GROUPS[id]) window.open(GROUPS[id], '_blank');
+}
+</script>
+</body>
+</html>
