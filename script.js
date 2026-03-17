@@ -29,14 +29,14 @@ const API = {
     url:     "https://script.google.com/macros/s/AKfycbyobr7LWkEQjy0Kvu-_eRoTgTG-aWEPC8Lk81l6pIYar85KIz1BoZfYijcp3zjghvYhPA/exec",
     refresh: 10_000,
     timeMs:  (item) => item.startTime,   // already ms
-    linkFn:  (item) => item.shopId,
+    linkFn:  (item) => `https://shopee.vn/live/session/${item.sessionId}`,
     subId:   "xue-spin",
   },
   gift: {
     url:     "https://script.google.com/macros/s/AKfycbxhd52vK5-MQ21Xg92JYKTpx3L_wOi9DNbKXJB_UWOy_DkjUTMGRDY1TQfZiksKzqudNA/exec",
     refresh:  8_000,
     timeMs:  (item) => item.startTime * 1000,
-    linkFn:  (item) => item.sessionId,
+    linkFn:  (item) => `https://shopee.vn/live/session/${item.sessionId}`,
     subId:   "xue-gift",
   },
 };
