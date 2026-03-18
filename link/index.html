@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Săn Ngon — Chuyển Đổi Link Affiliate 🔗</title>
-  <link rel="icon" type="image/svg+xml" href="/img/favicon-sanngon.svg">
+  <title>Săn Ngon — Tối Ưu Link Shopee 🔗</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon-sanngon-v2.svg">
   <link rel="stylesheet" href="../style.css">
   <style>
     .hero { background: linear-gradient(135deg, #1A1A2E 0%, #16213E 60%, #EE4D2D 100%); }
@@ -46,8 +46,8 @@
     .info-box {
       background: var(--brand-light); border: 1px solid rgba(238,77,45,0.2);
       border-radius: var(--r-sm); padding: 12px;
-      font-size: 12px; font-weight: 600; color: #7A2010;
-      margin-bottom: 14px; line-height: 1.5;
+      font-size: 12px; font-weight: 700; color: #7A2010;
+      margin-bottom: 14px; line-height: 1.6;
     }
   </style>
 </head>
@@ -56,39 +56,45 @@
 <header class="site-header">
   <div class="header-inner">
     <a class="logo" href="/">
-      <img class="logo-mark" src="/img/logo-sanngon.svg" alt="Săn Ngon logo">
+      <img class="logo-mark" src="/img/logo-sanngon-v2.svg" alt="Săn Ngon logo">
       <span class="logo-text">Săn Ngon</span>
     </a>
-    <nav class="nav">
-      <a class="nav-link" href="/">Vòng quay</a>
-      <a class="nav-link" href="/tui">Túi quà</a>
-      <a class="nav-link" href="/flashsale">Flash Sale</a>
-      <a class="nav-link" href="/live">Live</a>
-    </nav>
-    <a class="tele-btn" href="https://t.me/shopeelivexucoin" target="_blank" rel="noopener">💬 Telegram</a>
+    <details class="menu-wrap">
+      <summary class="menu-toggle" aria-label="Mở menu">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>
+      </summary>
+      <div class="menu-panel">
+        <a class="menu-link " href="/"><span>🏠 Trang chủ</span><small>Flash Sale</small></a>
+        <a class="menu-link " href="/flashsale"><span>⚡ Flash Sale</span><small>Deal hot</small></a>
+        <a class="menu-link " href="/quay/"><span>🎡 Vòng quay</span><small>Săn xu</small></a>
+        <a class="menu-link " href="/tui"><span>🎁 Túi quà</span><small>Nhận quà</small></a>
+        <a class="menu-link " href="/live"><span>📺 Live</span><small>Đang phát</small></a>
+        <a class="menu-link active" href="/link"><span>🔗 Đổi link</span><small>Công cụ</small></a>
+      </div>
+    </details>
   </div>
 </header>
 
 <div class="hero">
   <div class="hero-inner">
-    <h1 class="hero-title">Chuyển Đổi <span class="hl">Link</span> 🔗</h1>
-    <p class="hero-sub">Paste link Shopee vào, tool tự chuyển thành link affiliate tracking</p>
+    <h1 class="hero-title">Tối Ưu <span class="hl">Link</span> 🔗</h1>
+    <p class="hero-sub">Dán link Shopee vào để chuyển sang định dạng gọn, đồng nhất và dễ dùng hơn.</p>
   </div>
 </div>
 
 <main class="main">
   <div class="info-box">
-    💡 Paste một hoặc nhiều link <code>s.shopee.vn/...</code> vào ô bên dưới. Tool sẽ gắn affiliate ID <strong>17327330054</strong> vào để tracking hoa hồng cho bạn.
+    💡 Dán một hoặc nhiều link <code>s.shopee.vn/...</code> hoặc <code>shopee.vn/...</code> vào ô bên dưới. Công cụ sẽ xử lý lại để bạn dễ copy, chia sẻ và quản lý hơn.
   </div>
 
   <div class="tool-card">
-    <p class="tool-label">📥 Link gốc (dán vào đây)</p>
+    <p class="tool-label">📥 Link gốc</p>
     <textarea id="inputText" placeholder="Paste link Shopee vào đây...&#10;Ví dụ: https://s.shopee.vn/xxxxxxx&#10;&#10;Có thể dán nhiều link cùng lúc"></textarea>
-    <button class="convert-btn" onclick="convertLinks()">🔄 Chuyển đổi ngay</button>
+    <button class="convert-btn" onclick="convertLinks()">🔄 Xử lý ngay</button>
   </div>
 
   <div class="tool-card result-area" id="resultArea">
-    <p class="tool-label">📤 Link affiliate (copy để dùng)</p>
+    <p class="tool-label">📤 Link đã xử lý</p>
     <textarea id="outputText" readonly></textarea>
     <button class="copy-btn" onclick="copyOutput()">📋 Copy tất cả</button>
   </div>
@@ -113,25 +119,23 @@ async function convertLinks() {
   btn.textContent = "⏳ Đang xử lý...";
   btn.disabled = true;
 
-  // Extract s.shopee.vn short links
   const matches = [...raw.matchAll(/https?:\/\/s\.shopee\.vn\/\S+/g)].map(m => m[0]);
 
   if (!matches.length) {
-    // No short links — try to wrap full links directly
     const fullMatches = [...raw.matchAll(/https?:\/\/shopee\.vn\/\S+/g)].map(m => m[0]);
     if (fullMatches.length) {
       const wrapped = fullMatches.map(u =>
-        `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=${SUB_ID}&origin_link=${encodeURIComponent(u)}`
+        `https://s.shopee.vn/an_redir?origin_link=${encodeURIComponent(u)}&affiliate_id=${AFF_ID}&sub_id=${SUB_ID}`
       );
       let result = raw;
       fullMatches.forEach((old, i) => { result = result.replaceAll(old, wrapped[i]); });
       document.getElementById("outputText").value = result;
       area.style.display = "block";
-      btn.textContent = "🔄 Chuyển đổi ngay"; btn.disabled = false;
+      btn.textContent = "🔄 Xử lý ngay"; btn.disabled = false;
       return;
     }
-    alert("Không tìm thấy link Shopee nào. Hãy paste link dạng s.shopee.vn/... hoặc shopee.vn/...");
-    btn.textContent = "🔄 Chuyển đổi ngay"; btn.disabled = false;
+    alert("Không tìm thấy link Shopee nào. Hãy dán link dạng s.shopee.vn/... hoặc shopee.vn/...");
+    btn.textContent = "🔄 Xử lý ngay"; btn.disabled = false;
     return;
   }
 
@@ -155,16 +159,15 @@ async function convertLinks() {
     document.getElementById("outputText").value = result;
     area.style.display = "block";
   } catch(e) {
-    // Fallback: wrap trực tiếp không qua API
     let result = raw;
     matches.forEach(old => {
-      const wrapped = `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=${SUB_ID}&origin_link=${encodeURIComponent(old)}`;
+      const wrapped = `https://s.shopee.vn/an_redir?origin_link=${encodeURIComponent(old)}&affiliate_id=${AFF_ID}&sub_id=${SUB_ID}`;
       result = result.replaceAll(old, wrapped);
     });
     document.getElementById("outputText").value = result;
     area.style.display = "block";
   } finally {
-    btn.textContent = "🔄 Chuyển đổi ngay";
+    btn.textContent = "🔄 Xử lý ngay";
     btn.disabled = false;
   }
 }
