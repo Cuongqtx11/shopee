@@ -267,7 +267,7 @@ function calcDiscountPercent(price, before, fallback = 0) {
   if (b > p && p >= 0) return Math.round(((b - p) / b) * 100);
   return Number(fallback) || 0;
 }
-function normalizeItem(item) {
+function normalizeItem(item, originalIndex = 0) {
   const selectedPromo = state.promotions.find(p => p.promotionid == state.currentPid) || null;
   const selectedStart = Number(selectedPromo?.start_time || 0);
   const selectedEnd = Number(selectedPromo?.end_time || 0);
@@ -320,7 +320,8 @@ function normalizeItem(item) {
     soldPercent,
     isSoldOut,
     hasRealFlashsaleSignals,
-    priceBucket: getPriceBucket(price)
+    priceBucket: getPriceBucket(price),
+    originalIndex
   };
 }
 function passesFilter(item) {
@@ -331,19 +332,11 @@ function passesFilter(item) {
   return true;
 }
 function sortProducts(items) {
-  const bucketOrder = { zero: 0, onek: 1, ninek: 2, other: 3 };
   return [...items].sort((a, b) => {
-    if (a.isLiveSlot !== b.isLiveSlot) return a.isLiveSlot ? -1 : 1;
-    if (a.isSoldOut !== b.isSoldOut) return a.isSoldOut ? 1 : -1;
-    if (a.isFlashsalePriceReliable !== b.isFlashsalePriceReliable) return a.isFlashsalePriceReliable ? -1 : 1;
     if (state.sortMode === 'price-asc') return a.price - b.price;
     if (state.sortMode === 'price-desc') return b.price - a.price;
     if (state.sortMode === 'discount-desc') return (b.discount || 0) - (a.discount || 0);
-    const bucketDiff = (bucketOrder[a.priceBucket] ?? 9) - (bucketOrder[b.priceBucket] ?? 9);
-    if (bucketDiff !== 0) return bucketDiff;
-    if (a.price !== b.price) return a.price - b.price;
-    if ((b.discount || 0) !== (a.discount || 0)) return (b.discount || 0) - (a.discount || 0);
-    return (a.soldPercent || 0) - (b.soldPercent || 0);
+    return (a.originalIndex || 0) - (b.originalIndex || 0);
   });
 }
 function rebuildFiltered() {
@@ -405,7 +398,7 @@ async function fetchFlashSale(pid) {
     const res = await fetch(`${FLASHSALE_URL}?${qs.toString()}`);
     state.source = res.headers.get('X-Flashsale-Source') || 'unknown';
     const data = await res.json();
-    const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
+    const normalized = Array.isArray(data) ? data.map((item, index) => normalizeItem(item, index)).filter(item => item.imageUrl && item.productUrl) : [];
     state.usingFallback = state.source !== 'upstream';
     state.allData = normalized.length ? normalized : await loadFallbackProducts(true);
   } catch (e) {
@@ -423,7 +416,7 @@ async function fetchFlashSale(pid) {
 async function loadFallbackProducts(returnOnly = false) {
   const res = await fetch(FALLBACK_FILE, { cache: 'no-store' });
   const data = await res.json();
-  const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
+  const normalized = Array.isArray(data) ? data.map((item, index) => normalizeItem(item, index)).filter(item => item.imageUrl && item.productUrl) : [];
   if (returnOnly) return normalized;
   state.allData = normalized;
   rebuildFiltered();
