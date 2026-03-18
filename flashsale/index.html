@@ -284,7 +284,13 @@ function normalizeItem(item) {
     : false;
   const inSelectedSlot = true;
   const isLiveSlot = true;
-  const hasRealFlashsaleSignals = (matchesSlotLabel || matchesSlotTime || !itemSlot) && totalStock != null && before > price && Number(item?.discount || item?.raw_discount || 0) > 0;
+  const upstreamDiscount = Number(item?.discount || item?.raw_discount || 0);
+  const hasRealFlashsaleSignals = (matchesSlotLabel || matchesSlotTime || !itemSlot)
+    && totalStock != null
+    && remain != null
+    && remain > 0
+    && before > price
+    && calcDiscountPercent(price, before, upstreamDiscount) >= 5;
   const isFlashsalePriceReliable = hasRealFlashsaleSignals && !isSoldOut;
   const discount = calcDiscountPercent(price, before, item?.raw_discount || item?.discount || 0);
   return {
@@ -458,12 +464,24 @@ function renderPromotions() {
     promoBar.appendChild(btn);
   });
 }
+function getPreferredPromotionId() {
+  const now = Math.floor(Date.now() / 1000);
+  const live = state.promotions.find(p => now >= p.start_time && now < p.end_time);
+  if (live) return live.promotionid;
+  const next = state.promotions.find(p => now < p.start_time);
+  return next ? next.promotionid : (state.promotions[0]?.promotionid || null);
+}
 function updateCountdown() {
   const promo = state.promotions.find(p => p.promotionid == state.currentPid);
   if (!promo) return countdownEl.textContent = 'Đang tải...';
   clearInterval(window.timerInterval);
   const tick = () => {
     const now = Math.floor(Date.now() / 1000);
+    const preferredPid = getPreferredPromotionId();
+    if (preferredPid && String(preferredPid) !== String(state.currentPid)) {
+      selectPromotion(preferredPid);
+      return;
+    }
     if (now < promo.start_time) {
       const diff = promo.start_time - now;
       const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
@@ -473,6 +491,8 @@ function updateCountdown() {
     const diff = promo.end_time - now;
     if (diff <= 0) {
       countdownEl.textContent = 'Hết khung giờ';
+      const nextPid = getPreferredPromotionId();
+      if (nextPid && String(nextPid) !== String(state.currentPid)) selectPromotion(nextPid);
       return;
     }
     const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
@@ -485,7 +505,7 @@ function setupAutoRefresh() {
   state.autoRefreshTimer = setInterval(() => {
     if (document.hidden) return;
     fetchFlashSale(state.currentPid);
-  }, 20000);
+  }, 10000);
 }
 async function selectPromotion(pid) { state.currentPid = pid; renderPromotions(); updateCountdown(); await fetchFlashSale(pid); }
 async function init() {
@@ -509,6 +529,16 @@ async function init() {
 
 searchBtn.addEventListener('click', () => { state.keyword = kwInput.value || ''; fetchFlashSale(state.currentPid); });
 kwInput.addEventListener('keydown', e => { if (e.key === 'Enter') { state.keyword = kwInput.value || ''; fetchFlashSale(state.currentPid); } });
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    const preferredPid = getPreferredPromotionId();
+    if (preferredPid && String(preferredPid) !== String(state.currentPid)) {
+      selectPromotion(preferredPid);
+    } else {
+      fetchFlashSale(state.currentPid);
+    }
+  }
+});
 filterToggle.addEventListener('click', () => filterPanel.classList.toggle('open'));
 filterBtns.forEach(btn => btn.addEventListener('click', () => { filterBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); state.priceFilter = btn.dataset.price; rebuildFiltered(); renderNextBatch(true); }));
 sortBtns.forEach(btn => btn.addEventListener('click', () => { sortBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); state.sortMode = btn.dataset.sort; rebuildFiltered(); renderNextBatch(true); }));
