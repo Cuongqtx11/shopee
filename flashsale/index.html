@@ -339,6 +339,7 @@ function itemCard(item) {
   const selectedPromo = state.promotions.find(p => p.promotionid == state.currentPid) || null;
   const now = Math.floor(Date.now() / 1000);
   const isUpcomingPromo = selectedPromo ? now < Number(selectedPromo.start_time || 0) : false;
+  const isEndedPromo = selectedPromo ? now >= Number(selectedPromo.end_time || 0) : false;
   const progressText = item.isSoldOut
     ? 'ĐÃ BÁN HẾT'
     : isUpcomingPromo
@@ -346,7 +347,12 @@ function itemCard(item) {
       : item.totalStock != null && item.sold > 0
         ? `ĐÃ BÁN ${item.sold.toLocaleString('vi-VN')}`
         : 'ĐANG BÁN CHẠY';
-  const hotBadge = !item.isSoldOut && item.soldPercent >= 40 ? '<span class="fs-meta-badge">🔥 Bán chạy</span>' : (!item.isSoldOut && item.isLiveSlot ? '<span class="fs-meta-badge">⚡ Flash Sale</span>' : '');
+  const statusBadge = isUpcomingPromo
+    ? '<span class="fs-meta-badge">🕒 Sắp diễn ra</span>'
+    : isEndedPromo
+      ? '<span class="fs-meta-badge">⏹ Đã kết thúc</span>'
+      : '<span class="fs-meta-badge">🔴 Đang diễn ra</span>';
+  const hotBadge = !item.isSoldOut && item.soldPercent >= 40 ? '<span class="fs-meta-badge">🔥 Bán chạy</span>' : '';
   a.innerHTML = `
     <div class="fs-thumb">
       <img loading="lazy" src="${item.imageUrl}" alt="${item.name.replace(/"/g,'&quot;')}">
@@ -356,7 +362,7 @@ function itemCard(item) {
     </div>
     <div class="fs-content">
       <div class="fs-name">${item.name}</div>
-      <div class="fs-meta">${hotBadge}</div>
+      <div class="fs-meta">${statusBadge}${hotBadge}</div>
       <div class="fs-price-row"><div class="fs-now">${formatPrice(item.price)}</div>${item.priceBeforeDiscount ? `<div class="fs-before">${formatPrice(item.priceBeforeDiscount)}</div>` : ''}</div>
       <div class="fs-progress"><div class="fs-progress-bar" style="width:${item.soldPercent}%"></div><div class="fs-progress-text">${progressText}</div></div>
     </div>`;
