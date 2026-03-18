@@ -214,7 +214,7 @@ const PRICE_BUCKETS = {
 let state = {
   promotions: [], currentPid: null, allData: [], filtered: [], rendered: 0,
   usingFallback: false, source: 'unknown', keyword: '', priceFilter: 'all', sortMode: 'smart',
-  autoRefreshTimer: null, userPinnedPromo: false
+  autoRefreshTimer: null, userPinnedPromo: false, smartSeed: Date.now()
 };
 
 const grid = document.getElementById('fsGrid');
@@ -332,11 +332,21 @@ function passesFilter(item) {
   return true;
 }
 function sortProducts(items) {
+  const dynamicRank = (item) => {
+    const sold = Number(item.soldPercent || 0);
+    const discount = Number(item.discount || 0);
+    const stockBoost = item.isSoldOut ? -1000 : 0;
+    const drift = ((Number(item.originalIndex || 0) * 17 + Math.floor(state.smartSeed / 60000)) % 7) - 3;
+    return stockBoost + sold * 1.6 + discount * 0.35 + drift;
+  };
+
   return [...items].sort((a, b) => {
     if (state.sortMode === 'price-asc') return a.price - b.price;
     if (state.sortMode === 'price-desc') return b.price - a.price;
     if (state.sortMode === 'discount-desc') return (b.discount || 0) - (a.discount || 0);
     if (a.isSoldOut !== b.isSoldOut) return a.isSoldOut ? 1 : -1;
+    const rankDiff = dynamicRank(b) - dynamicRank(a);
+    if (Math.abs(rankDiff) > 2) return rankDiff;
     return (a.originalIndex || 0) - (b.originalIndex || 0);
   });
 }
