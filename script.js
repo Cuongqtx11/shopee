@@ -103,10 +103,10 @@ function logClick(mode, shopName) {
 }
 
 // ── BUILD CARD ───────────────────────────────────────────────────
-function buildCard(item, mode) {
+function buildCard(item, mode, finalHref = null) {
   const cfg       = API[mode];
   const rawLink   = cfg.linkFn(item);
-  const aLink     = affWrap(rawLink, cfg.subId);
+  const aLink     = finalHref || affWrap(rawLink, cfg.subId);
   const coinLabel = item.maxcoin === 0 ? "🎟 Voucher"
                   : item.maxcoin       ? `${item.maxcoin} xu`
                                        : "?";
@@ -138,14 +138,6 @@ function buildCard(item, mode) {
     </div>
   `;
 
-  if (mode === 'gift') {
-    const btn = card.querySelector('.go-btn');
-    btn.dataset.rawLink = rawLink;
-    resolveGiftLink(rawLink).then((resolved) => {
-      btn.href = affWrap(resolved || rawLink, cfg.subId);
-    });
-  }
-
   return card;
 }
 
@@ -166,8 +158,17 @@ async function renderList(mode) {
     listEl.innerHTML = "";
     _items = [];
 
-    for (const item of sorted) {
-      const card = buildCard(item, mode);
+    let finalLinks = [];
+    if (mode === 'gift') {
+      finalLinks = await Promise.all(sorted.map(async (item) => {
+        const rawLink = API[mode].linkFn(item);
+        const resolved = await resolveGiftLink(rawLink);
+        return affWrap(resolved || rawLink, API[mode].subId);
+      }));
+    }
+
+    for (const [index, item] of sorted.entries()) {
+      const card = buildCard(item, mode, mode === 'gift' ? finalLinks[index] : null);
       listEl.appendChild(card);
       _items.push({
         el: card.querySelector(".countdown"),
