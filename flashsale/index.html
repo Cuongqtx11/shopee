@@ -206,7 +206,7 @@ const PRICE_BUCKETS = {
 let state = {
   promotions: [], currentPid: null, allData: [], filtered: [], rendered: 0,
   usingFallback: false, source: 'unknown', keyword: '', priceFilter: 'all', sortMode: 'smart',
-  autoRefreshTimer: null
+  autoRefreshTimer: null, userPinnedPromo: false
 };
 
 const grid = document.getElementById('fsGrid');
@@ -460,7 +460,7 @@ function renderPromotions() {
     const timeStr = p.sale_slot || `${new Date(p.start_time * 1000).getHours().toString().padStart(2, '0')}:00`;
     const status = now >= p.start_time && now < p.end_time ? 'Đang diễn ra' : (now < p.start_time ? 'Sắp diễn ra' : 'Đã xong');
     btn.innerHTML = `<span class="time">${timeStr}</span><span class="status">${status}</span>`;
-    btn.onclick = () => selectPromotion(p.promotionid);
+    btn.onclick = () => selectPromotion(p.promotionid, { userInitiated: true });
     promoBar.appendChild(btn);
   });
 }
@@ -477,11 +477,6 @@ function updateCountdown() {
   clearInterval(window.timerInterval);
   const tick = () => {
     const now = Math.floor(Date.now() / 1000);
-    const preferredPid = getPreferredPromotionId();
-    if (preferredPid && String(preferredPid) !== String(state.currentPid)) {
-      selectPromotion(preferredPid);
-      return;
-    }
     if (now < promo.start_time) {
       const diff = promo.start_time - now;
       const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
@@ -491,8 +486,10 @@ function updateCountdown() {
     const diff = promo.end_time - now;
     if (diff <= 0) {
       countdownEl.textContent = 'Hết khung giờ';
-      const nextPid = getPreferredPromotionId();
-      if (nextPid && String(nextPid) !== String(state.currentPid)) selectPromotion(nextPid);
+      if (!state.userPinnedPromo) {
+        const nextPid = getPreferredPromotionId();
+        if (nextPid && String(nextPid) !== String(state.currentPid)) selectPromotion(nextPid, { userInitiated: false });
+      }
       return;
     }
     const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
@@ -507,7 +504,13 @@ function setupAutoRefresh() {
     fetchFlashSale(state.currentPid);
   }, 10000);
 }
-async function selectPromotion(pid) { state.currentPid = pid; renderPromotions(); updateCountdown(); await fetchFlashSale(pid); }
+async function selectPromotion(pid, options = {}) {
+  state.currentPid = pid;
+  state.userPinnedPromo = !!options.userInitiated;
+  renderPromotions();
+  updateCountdown();
+  await fetchFlashSale(pid);
+}
 async function init() {
   showLoading(true);
   try {
@@ -531,12 +534,14 @@ searchBtn.addEventListener('click', () => { state.keyword = kwInput.value || '';
 kwInput.addEventListener('keydown', e => { if (e.key === 'Enter') { state.keyword = kwInput.value || ''; fetchFlashSale(state.currentPid); } });
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
-    const preferredPid = getPreferredPromotionId();
-    if (preferredPid && String(preferredPid) !== String(state.currentPid)) {
-      selectPromotion(preferredPid);
-    } else {
-      fetchFlashSale(state.currentPid);
+    if (!state.userPinnedPromo) {
+      const preferredPid = getPreferredPromotionId();
+      if (preferredPid && String(preferredPid) !== String(state.currentPid)) {
+        selectPromotion(preferredPid, { userInitiated: false });
+        return;
+      }
     }
+    fetchFlashSale(state.currentPid);
   }
 });
 filterToggle.addEventListener('click', () => filterPanel.classList.toggle('open'));
