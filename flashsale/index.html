@@ -332,12 +332,10 @@ function passesFilter(item) {
   return true;
 }
 function sortProducts(items) {
-  const dynamicRank = (item) => {
-    const sold = Number(item.soldPercent || 0);
-    const discount = Number(item.discount || 0);
-    const stockBoost = item.isSoldOut ? -1000 : 0;
-    const drift = ((Number(item.originalIndex || 0) * 17 + Math.floor(state.smartSeed / 60000)) % 7) - 3;
-    return stockBoost + sold * 1.6 + discount * 0.35 + drift;
+  const smartScore = (item) => {
+    const minuteSeed = Math.floor(state.smartSeed / 60000) || 0;
+    const base = Number(item.originalIndex || 0) * 1103515245 + minuteSeed * 12345;
+    return Math.abs(Math.sin(base)) % 1;
   };
 
   return [...items].sort((a, b) => {
@@ -345,8 +343,8 @@ function sortProducts(items) {
     if (state.sortMode === 'price-desc') return b.price - a.price;
     if (state.sortMode === 'discount-desc') return (b.discount || 0) - (a.discount || 0);
     if (a.isSoldOut !== b.isSoldOut) return a.isSoldOut ? 1 : -1;
-    const rankDiff = dynamicRank(b) - dynamicRank(a);
-    if (Math.abs(rankDiff) > 2) return rankDiff;
+    const scoreDiff = smartScore(b) - smartScore(a);
+    if (Math.abs(scoreDiff) > 0.0001) return scoreDiff;
     return (a.originalIndex || 0) - (b.originalIndex || 0);
   });
 }
@@ -403,6 +401,7 @@ async function fetchFlashSale(pid) {
   grid.innerHTML = ''; emptyEl.style.display = 'none'; showLoading(true);
   const skels = [...Array(8)].map(skeletonCard); skels.forEach(s => grid.appendChild(s));
   try {
+    state.smartSeed = Date.now();
     const qs = new URLSearchParams();
     if (pid) qs.set('promotionid', pid);
     if (state.keyword.trim()) qs.set('keyword', state.keyword.trim());
