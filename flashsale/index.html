@@ -441,7 +441,14 @@ function updateActiveFilterUI() {
 function renderPromotions() {
   promoBar.innerHTML = '';
   const now = Math.floor(Date.now() / 1000);
-  state.promotions.forEach(p => {
+  const live = state.promotions.filter(p => now >= p.start_time && now < p.end_time);
+  const upcoming = state.promotions.filter(p => now < p.start_time).slice(0, 2);
+  const ended = state.promotions.filter(p => now >= p.end_time && !(now >= p.start_time && now < p.end_time)).slice(-1);
+  const visiblePromos = [...live, ...upcoming];
+  if (!visiblePromos.length && ended.length) visiblePromos.push(ended[0]);
+  if (!visiblePromos.length) visiblePromos.push(...state.promotions.slice(0, 3));
+
+  visiblePromos.forEach(p => {
     const btn = document.createElement('button');
     btn.className = 'promo-btn' + (state.currentPid == p.promotionid ? ' active' : '');
     const timeStr = p.sale_slot || `${new Date(p.start_time * 1000).getHours().toString().padStart(2, '0')}:00`;
