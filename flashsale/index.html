@@ -6,67 +6,96 @@
   <title>XU Ế — Flash Sale Shopee ⚡</title>
   <link rel="stylesheet" href="../style.css">
   <style>
-    :root {
-      --bg:#f8fafc; --card:#ffffff; --text-fs:#0f172a; --muted:#475569;
-      --ring:#e2e8f0; --shadow-fs: 0 4px 20px rgba(2,6,23,.08);
+    :root{
+      --fs-brand:#ee4d2d; --fs-brand-2:#ff6b35; --fs-yellow:#ffd54f; --fs-purple:#8b5cf6;
+      --fs-bg:#f8fafc; --fs-card:#fff; --fs-text:#0f172a; --fs-muted:#64748b; --fs-ring:#e2e8f0;
+      --fs-shadow:0 10px 28px rgba(15,23,42,.08);
     }
-    .fs-wrap  { max-width: 1000px; margin: 0 auto; padding: 0 14px; }
-    .toolbar  { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:12px 0; }
-    .pill     { display:flex; gap:8px; align-items:center; background:var(--card); border:1px solid var(--ring); border-radius:999px; padding:10px 12px; box-shadow:var(--shadow-fs); }
-    .pill input { border:none; outline:none; background:transparent; width:100%; font-family:var(--font); font-size:14px; }
-    .btn      { display:inline-flex; justify-content:center; align-items:center; gap:6px; background:var(--brand); color:#fff; border:none; border-radius:999px; padding:10px 14px; font-weight:800; cursor:pointer; font-family:var(--font); }
-    
-    .promo-bar{ display:flex; overflow-x:auto; gap:8px; padding:10px 14px; max-width:1000px; margin:0 auto; scrollbar-width: none; }
-    .promo-bar::-webkit-scrollbar { display: none; }
-    .promo-btn{ flex:0 0 auto; padding:8px 12px; border-radius:12px; border:1px solid var(--ring); background:var(--card); cursor:pointer; font-weight:700; font-family:var(--font); box-shadow:var(--shadow-fs); color:var(--muted); text-align: center; min-width: 80px; }
-    .promo-btn.active { background:var(--brand); color:#fff; border-color:var(--brand); }
-    .promo-btn .time { font-size: 16px; display: block; }
-    .promo-btn .status { font-size: 10px; font-weight: 600; opacity: 0.8; }
-    
-    .countdown-wrap { padding:4px 0 12px; display:flex; justify-content:center; }
-    #countdown{ font-size:13px; font-weight:600; padding:2px 12px; border-radius:999px; color:#fff; background:var(--brand); display:inline-flex; align-items:center; }
+    body{background:var(--fs-bg)}
+    .fs-wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+    .fs-hero{padding:28px 16px 14px;text-align:center}
+    .fs-hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#fff7ed;color:#c2410c;font-weight:800;font-size:12px;border:1px solid #fdba74}
+    .fs-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:pulse 1.2s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(1.5)}}
+    .fs-hero h1{margin:12px 0 8px;font-size:clamp(1.9rem,5vw,3rem);line-height:1.05;font-weight:900}
+    .fs-hero .accent{background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .fs-hero p{margin:0 auto;max-width:520px;color:#6b7280;font-weight:600}
 
-    .grid     { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:0 14px 40px; max-width:1000px; margin:0 auto; }
-    @media(min-width:720px){ .grid{ grid-template-columns:repeat(4,minmax(0,1fr)); } }
-    
-    .card     { background:var(--card); border:1px solid var(--ring); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-fs); display:flex; flex-direction:column; text-decoration: none; position: relative; transition: transform 0.2s; }
-    .card:hover { transform: translateY(-3px); }
-    .thumb    { position:relative; width:100%; padding-top:100%; background:#f1f5f9; }
-    .thumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-    .badge    { position:absolute; top:8px; left:8px; background:var(--brand); color:#fff; font-size:11px; font-weight:800; border-radius:4px; padding:2px 6px; z-index: 1; }
-    .price-tag { position:absolute; left:8px; bottom:8px; color:#fff; font-size:10px; font-weight:900; border-radius:999px; padding:4px 8px; z-index:1; box-shadow:0 4px 12px rgba(0,0,0,.18); }
-    .price-tag.zero { background:linear-gradient(90deg,#22c55e,#16a34a); }
-    .price-tag.onek { background:linear-gradient(90deg,#ef4444,#f97316); }
-    .price-tag.ninek { background:linear-gradient(90deg,#8b5cf6,#ec4899); }
-    .soldout-badge { position:absolute; right:8px; top:8px; background:#0f172a; color:#fff; font-size:10px; font-weight:800; border-radius:999px; padding:4px 8px; z-index:1; }
-    
-    .content  { padding:10px; display:flex; flex-direction:column; gap:6px; flex:1; }
-    .name     { font-size:13px; font-weight:600; line-height:1.4; height: 36px; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; color:var(--text-fs); }
-    .meta     { display:flex; flex-direction:column; gap:2px; font-size:11px; color:var(--muted); }
-    .stock-row { display:flex; justify-content:space-between; gap:8px; }
-    .price    { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top: auto; }
-    .now      { font-size:15px; font-weight:800; color:var(--brand); }
-    .before   { font-size:11px; color:var(--muted); text-decoration:line-through; }
-    
-    .progress-wrap { position: relative; height: 16px; background: #ffe3df; border-radius: 10px; overflow: hidden; margin-top: 4px; }
-    .progress-bar { height: 100%; background: linear-gradient(90deg, #ff7043, #ee4d2d); border-radius: 10px; }
-    .progress-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .fs-loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.76);backdrop-filter:blur(4px);display:none;z-index:50;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+    .fs-spinner{width:42px;height:42px;border-radius:50%;border:4px solid #fed7aa;border-top-color:var(--fs-brand);animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .fs-loading-text{font-weight:800;color:#334155}
 
-    .skeleton { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
-    @keyframes shimmer { to { background-position: -200% 0; } }
-    
-    #empty { display:none; text-align:center; padding:60px 20px; color:var(--muted); font-weight:600; }
-    #loading { text-align:center; padding:40px; }
+    .fs-header{position:sticky;top:0;z-index:20;background:rgba(248,250,252,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(226,232,240,.9);margin-bottom:14px}
+    .promo-bar{display:flex;justify-content:center;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 0 4px}
+    .promo-bar::-webkit-scrollbar{display:none}
+    .promo-btn{flex:0 0 auto;padding:8px 14px;border-radius:14px;border:1px solid var(--fs-ring);background:#fff;color:#475569;font-weight:800;min-width:82px;box-shadow:var(--fs-shadow);cursor:pointer}
+    .promo-btn.active{background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff;border-color:transparent}
+    .promo-btn .time{display:block;font-size:16px}
+    .promo-btn .status{display:block;font-size:10px;opacity:.9}
+
+    .fs-toolbar{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 0 12px}
+    .fs-pill{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:11px 14px;box-shadow:var(--fs-shadow)}
+    .fs-pill input{border:none;outline:none;background:transparent;width:100%;font:inherit}
+    .fs-search-btn,.fs-filter-toggle,.fs-loadmore{border:none;border-radius:999px;padding:11px 14px;font-weight:800;cursor:pointer;font:inherit}
+    .fs-search-btn{background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff}
+    .fs-filter-toggle{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--fs-ring);color:#334155}
+    .fs-filter-panel{display:none;padding:0 0 12px}
+    .fs-filter-panel.open{display:block}
+    .fs-filter-row{display:flex;flex-wrap:wrap;gap:8px}
+    .fs-filter-btn{border:1px solid var(--fs-ring);background:#fff;color:#334155;padding:9px 12px;border-radius:999px;font-weight:800;cursor:pointer}
+    .fs-filter-btn.active{background:#fff1f2;border-color:#fb7185;color:#be123c}
+    .segmented{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .seg{border:1px solid var(--fs-ring);background:#fff;color:#334155;padding:9px 12px;border-radius:999px;font-weight:800;cursor:pointer}
+    .seg.active{background:#0f172a;color:#fff;border-color:#0f172a}
+    .fs-active-filter{display:none;align-items:center;gap:8px;margin-top:8px;padding:8px 12px;border-radius:999px;background:#fff7ed;color:#9a3412;width:max-content;max-width:100%}
+    .fs-active-filter button{border:none;background:transparent;cursor:pointer;font-weight:900;color:inherit}
+    .countdown-wrap{display:flex;justify-content:center;padding-bottom:10px}
+    #fsCountdown{display:inline-flex;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:8px 14px;font-weight:800;color:#334155;box-shadow:var(--fs-shadow)}
+
+    .fs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:4px 0 24px}
+    @media(min-width:760px){.fs-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    .fs-card{display:flex;flex-direction:column;text-decoration:none;background:#fff;border:1px solid var(--fs-ring);border-radius:18px;overflow:hidden;box-shadow:var(--fs-shadow);transition:transform .18s ease, box-shadow .18s ease}
+    .fs-card:hover{transform:translateY(-3px);box-shadow:0 16px 30px rgba(15,23,42,.12)}
+    .fs-card.is-soldout{opacity:.76}
+    .fs-thumb{position:relative;width:100%;padding-top:100%;background:#f1f5f9}
+    .fs-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .fs-badge{position:absolute;left:8px;top:8px;background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff;font-size:11px;font-weight:900;border-radius:8px;padding:4px 7px}
+    .fs-price-tag{position:absolute;left:8px;bottom:8px;color:#fff;font-size:10px;font-weight:900;padding:5px 9px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+    .fs-price-tag.zero{background:linear-gradient(135deg,#16a34a,#22c55e)}
+    .fs-price-tag.onek{background:linear-gradient(135deg,#ef4444,#f97316)}
+    .fs-price-tag.ninek{background:linear-gradient(135deg,#7c3aed,#ec4899)}
+    .fs-soldout{position:absolute;right:8px;top:8px;background:#0f172a;color:#fff;font-size:10px;font-weight:900;padding:5px 9px;border-radius:999px}
+    .fs-content{display:flex;flex-direction:column;gap:7px;padding:11px}
+    .fs-name{font-size:13px;font-weight:700;line-height:1.4;color:var(--fs-text);height:36px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+    .fs-price-row{display:flex;align-items:end;gap:6px;flex-wrap:wrap}
+    .fs-now{font-size:16px;font-weight:900;color:var(--fs-brand)}
+    .fs-before{font-size:11px;text-decoration:line-through;color:var(--fs-muted)}
+    .fs-stock{font-size:11px;color:var(--fs-muted);display:flex;flex-direction:column;gap:2px}
+    .fs-stock-line{display:flex;justify-content:space-between;gap:8px}
+    .fs-progress{position:relative;height:17px;border-radius:999px;overflow:hidden;background:#ffe4dd}
+    .fs-progress-bar{height:100%;background:linear-gradient(90deg,#ff7a45,#ee4d2d)}
+    .fs-progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.18)}
+    .fs-empty{text-align:center;padding:48px 16px;color:var(--fs-muted);font-weight:700}
+    .fs-loadmore-wrap{display:flex;justify-content:center;padding:4px 0 26px}
+    .fs-loadmore{background:#fff;border:1px solid var(--fs-ring);color:#334155;box-shadow:var(--fs-shadow)}
+
+    .fs-skeleton{background:linear-gradient(90deg,#f1f5f9,#e2e8f0,#f1f5f9);background-size:200% 100%;animation:shimmer 1.4s infinite}
+    @keyframes shimmer{to{background-position:-200% 0}}
+    .fs-guide-btn{position:fixed;right:16px;bottom:20px;width:54px;height:54px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff;box-shadow:0 12px 28px rgba(238,77,45,.35);cursor:pointer;z-index:25}
+    .fs-guide-modal{position:fixed;inset:0;background:rgba(15,23,42,.52);display:none;align-items:center;justify-content:center;padding:18px;z-index:40}
+    .fs-guide-modal.open{display:flex}
+    .fs-guide-box{width:min(440px,100%);background:#fff;border-radius:22px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+    .fs-guide-box h3{margin:0 0 8px;font-size:20px}
+    .fs-guide-box p{margin:0 0 12px;color:var(--fs-muted)}
+    .fs-guide-box ol{margin:0 0 14px;padding-left:18px;color:#334155;display:flex;flex-direction:column;gap:8px}
+    .fs-guide-close{width:100%;border:none;border-radius:14px;padding:12px;background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff;font-weight:900;cursor:pointer}
   </style>
 </head>
 <body>
-
 <header class="site-header">
   <div class="header-inner">
-    <a class="logo" href="/">
-      <span class="logo-emoji">🎡</span>
-      <span class="logo-text">XU Ế</span>
-    </a>
+    <a class="logo" href="/"><span class="logo-emoji">🎡</span><span class="logo-text">XU Ế</span></a>
     <nav class="nav">
       <a class="nav-link" href="/">Vòng quay</a>
       <a class="nav-link" href="/tui">Túi quà</a>
@@ -77,81 +106,83 @@
   </div>
 </header>
 
-<div class="hero">
-  <div class="hero-inner">
-    <h1 class="hero-title">Flash Sale <span class="hl">Shopee</span> ⚡</h1>
-    <p class="hero-sub">Deal hot cập nhật liên tục · Săn ngay kẻo lỡ</p>
-  </div>
+<div id="fsLoadingOverlay" class="fs-loading-overlay">
+  <div class="fs-spinner"></div>
+  <div class="fs-loading-text">Đang tải Flash Sale…</div>
 </div>
 
-<div class="promo-bar" id="promoBar"></div>
-<div class="countdown-wrap"><span id="countdown">Đang tải...</span></div>
+<div class="fs-hero">
+  <div class="fs-hero-badge"><span class="fs-dot"></span> Cập nhật theo giờ</div>
+  <h1>⚡️ Flash Sale <span class="accent">Shopee</span></h1>
+  <p>Deal siêu rẻ mỗi khung giờ — ưu tiên 0đ, 1K, 9K và giữ toàn bộ link affiliate của bạn.</p>
+</div>
+
+<div class="fs-header">
+  <div class="fs-wrap">
+    <div id="fsPromoBar" class="promo-bar"></div>
+    <div class="fs-toolbar">
+      <div class="fs-pill">
+        <span>🔍</span>
+        <input id="fsKw" placeholder="Nhập từ khóa…" autocomplete="off">
+      </div>
+      <button id="fsSearchBtn" class="fs-search-btn">Tìm</button>
+      <button id="fsFilterToggle" class="fs-filter-toggle">Lọc ▾</button>
+    </div>
+    <div id="fsFilterPanel" class="fs-filter-panel">
+      <div class="fs-filter-row">
+        <button class="fs-filter-btn active" data-price="all">Tất cả</button>
+        <button class="fs-filter-btn" data-price="0d">🟢 0đ</button>
+        <button class="fs-filter-btn" data-price="1k">🪙 1.000₫</button>
+        <button class="fs-filter-btn" data-price="9k">💜 9.000₫</button>
+      </div>
+      <div id="fsSortSeg" class="segmented">
+        <button class="seg active" data-sort="smart">Ưu tiên hot</button>
+        <button class="seg" data-sort="price-asc">Giá ↑</button>
+        <button class="seg" data-sort="price-desc">Giá ↓</button>
+        <button class="seg" data-sort="discount-desc">Giảm nhiều</button>
+      </div>
+      <div id="fsActiveFilter" class="fs-active-filter"><span id="fsFilterLabel"></span><button id="fsFilterClear">✕</button></div>
+    </div>
+    <div class="countdown-wrap"><div id="fsCountdown">Đang tải...</div></div>
+  </div>
+</div>
 
 <div class="fs-wrap">
-  <div class="toolbar">
-    <div class="pill">
-      <span>🔍</span>
-      <input type="text" id="kw" placeholder="Tìm sản phẩm flash sale..." autocomplete="off">
-    </div>
-    <button class="btn" id="searchBtn">Tìm</button>
-  </div>
+  <div id="fsGrid" class="fs-grid" aria-live="polite"></div>
+  <div id="fsEmpty" class="fs-empty" style="display:none">Không có sản phẩm phù hợp.</div>
+  <div class="fs-loadmore-wrap"><button id="fsMoreBtn" class="fs-loadmore">Xem thêm</button></div>
 </div>
 
-<div id="loading" style="display:none">
-  <div class="grid">
-    <div class="card"><div class="thumb skeleton"></div><div class="content"><div class="skeleton" style="height:15px"></div><div class="skeleton" style="height:20px; width:60%"></div></div></div>
-    <div class="card"><div class="thumb skeleton"></div><div class="content"><div class="skeleton" style="height:15px"></div><div class="skeleton" style="height:20px; width:60%"></div></div></div>
-  </div>
-</div>
-
-<div id="empty">Rất tiếc, hiện không có sản phẩm flash sale nào.</div>
-<div class="grid" id="grid"></div>
-
-<div class="aff-block" style="max-width:var(--max);margin:20px auto 40px;padding:0 14px;">
+<div class="aff-block" style="max-width:var(--max);margin:0 auto 40px;padding:0 14px;">
   <div style="background:var(--brand-light);border:1.5px solid rgba(238,77,45,0.2);border-radius:14px;padding:16px;text-align:center;">
     <p class="aff-eyebrow">✨ Xem thêm hàng ngàn deal khác</p>
-    <a class="aff-cta"
-       href="https://s.shopee.vn/an_redir?affiliate_id=17327330054&sub_id=xue-banner-fs&origin_link=https%3A%2F%2Fshopee.vn%2Fflash_sale"
-       target="_blank" rel="noopener sponsored">
-      ⚡ Mở trang Flash Sale Shopee
-    </a>
+    <a class="aff-cta" href="https://s.shopee.vn/an_redir?affiliate_id=17327330054&sub_id=xue-banner-fs&origin_link=https%3A%2F%2Fshopee.vn%2Fflash_sale" target="_blank" rel="noopener sponsored">⚡ Mở trang Flash Sale Shopee</a>
   </div>
 </div>
 
-<footer class="site-footer">
-  <p>© 2025 XU Ế · Tổng hợp Flash Sale Shopee · Không thuộc Shopee</p>
-</footer>
+<button id="fsGuideBtn" class="fs-guide-btn" title="Hướng dẫn">?</button>
+<div id="fsGuideModal" class="fs-guide-modal">
+  <div class="fs-guide-box">
+    <h3>🎯 Cách săn deal nhanh</h3>
+    <p>Flow này mình làm theo kiểu của Húp Vội cho dễ dùng.</p>
+    <ol>
+      <li>Chọn sẵn sản phẩm muốn mua và lưu ý đúng khung giờ.</li>
+      <li>Ưu tiên tab 0đ / 1K / 9K để thấy deal rẻ nhất trước.</li>
+      <li>Canh countdown, vào link affiliate ngay khi mở bán.</li>
+      <li>Nếu card báo hết hàng thì sản phẩm sẽ tự bị đẩy xuống cuối.</li>
+    </ol>
+    <button id="fsGuideClose" class="fs-guide-close">Đã hiểu</button>
+  </div>
+</div>
+
+<footer class="site-footer"><p>© 2025 XU Ế · Tổng hợp Flash Sale Shopee · Không thuộc Shopee</p></footer>
 
 <script>
-const AFF_ID = "17327330054";
-const PROMOTIONS_URL = "/api/flashsale?action=promotions";
-const FLASHSALE_URL = "/api/flashsale";
-const FALLBACK_FILE = "./fallback-products.json";
-
-let state = {
-  promotions: [],
-  currentPid: null,
-  allData: [],
-  loading: false,
-  usingFallback: false,
-  keyword: ""
-};
-
-const grid = document.getElementById('grid');
-const emptyEl = document.getElementById('empty');
-const promoBar = document.getElementById('promoBar');
-const countdownEl = document.getElementById('countdown');
-const loadEl = document.getElementById('loading');
-const kwInput = document.getElementById('kw');
-const searchBtn = document.getElementById('searchBtn');
-
-function affWrap(url, subId = "xue-fs") {
-  if (!url) return "#";
-  if (url.includes("affiliate_id=")) {
-    return url.replace(/affiliate_id=\d+/, `affiliate_id=${AFF_ID}`);
-  }
-  return `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=${subId}&origin_link=${encodeURIComponent(url)}`;
-}
+const AFF_ID = '17327330054';
+const PROMOTIONS_URL = '/api/flashsale?action=promotions';
+const FLASHSALE_URL = '/api/flashsale';
+const FALLBACK_FILE = './fallback-products.json';
+const PAGE_SIZE = 16;
 
 const PRICE_BUCKETS = {
   zero: { min: 0, max: 0 },
@@ -159,12 +190,40 @@ const PRICE_BUCKETS = {
   ninek: { min: 5000, max: 14990 }
 };
 
+let state = {
+  promotions: [], currentPid: null, allData: [], filtered: [], rendered: 0,
+  usingFallback: false, keyword: '', priceFilter: 'all', sortMode: 'smart'
+};
+
+const grid = document.getElementById('fsGrid');
+const emptyEl = document.getElementById('fsEmpty');
+const promoBar = document.getElementById('fsPromoBar');
+const countdownEl = document.getElementById('fsCountdown');
+const loadingOverlay = document.getElementById('fsLoadingOverlay');
+const kwInput = document.getElementById('fsKw');
+const searchBtn = document.getElementById('fsSearchBtn');
+const filterToggle = document.getElementById('fsFilterToggle');
+const filterPanel = document.getElementById('fsFilterPanel');
+const filterBtns = [...document.querySelectorAll('.fs-filter-btn')];
+const sortBtns = [...document.querySelectorAll('.seg')];
+const activeFilter = document.getElementById('fsActiveFilter');
+const filterLabel = document.getElementById('fsFilterLabel');
+const filterClear = document.getElementById('fsFilterClear');
+const moreBtn = document.getElementById('fsMoreBtn');
+const guideBtn = document.getElementById('fsGuideBtn');
+const guideModal = document.getElementById('fsGuideModal');
+const guideClose = document.getElementById('fsGuideClose');
+
+function affWrap(url, subId = 'xue-fs') {
+  if (!url) return '#';
+  if (url.includes('affiliate_id=')) return url.replace(/affiliate_id=\d+/, `affiliate_id=${AFF_ID}`);
+  return `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=${subId}&origin_link=${encodeURIComponent(url)}`;
+}
 function formatPrice(value) {
   const n = Number(value) || 0;
-  if (!n) return "0đ";
+  if (!n) return '0đ';
   return `${n.toLocaleString('vi-VN')}đ`;
 }
-
 function getPriceBucket(price) {
   const p = Number(price) || 0;
   if (p === 0) return 'zero';
@@ -172,45 +231,44 @@ function getPriceBucket(price) {
   if (p >= PRICE_BUCKETS.ninek.min && p <= PRICE_BUCKETS.ninek.max) return 'ninek';
   return 'other';
 }
-
+function bucketLabel(bucket) {
+  return bucket === 'zero' ? '0đ' : bucket === 'onek' ? '1K' : bucket === 'ninek' ? '9K' : 'Tất cả';
+}
 function normalizeItem(item) {
-  const shopId = item?.t || item?.shop_id || item?.shopid || item?.shopId || null;
-  const itemId = item?.itemid || item?.item_id || item?.itemId || (item?.i && item?.y && item?.t
-    ? Math.round((item.i - 65756.757 + item.y + item.t) / 2.15)
-    : null);
-  const image = item?.img_url || item?.image_url || item?.image || item?.item_image || "";
-  const imageUrl = image && image.startsWith('http') ? image : (image ? `https://cf.shopee.vn/file/${image}` : '');
-  const productUrl = item?.product_url || item?.link || item?.url || (shopId && itemId ? `https://shopee.vn/product/${shopId}/${itemId}` : "https://shopee.vn/flash_sale");
+  const shopId = item?.shopid || item?.shopId || item?.shop_id || item?.t || null;
+  const itemId = item?.itemid || item?.itemId || item?.item_id || null;
+  const image = item?.img_url || item?.image_url || item?.image || '';
   const price = Number(item?.price || 0);
-  const before = Number(item?.price_before_discount || item?.priceBeforeDiscount || 0);
+  const before = Number(item?.price_before_discount || 0);
+  const sold = Number(item?.sold || 0);
+  const totalStock = Number(item?.flash_sale_stock || item?.total_stock || 0);
   const stock = Number(item?.stock);
-  const totalStock = Number(item?.flash_sale_stock || item?.total_stock || item?.flashSaleStock);
-  const sold = Number(item?.sold || item?.sold_count || item?.soldCount || 0);
-  const soldPercent = totalStock > 0
-    ? Math.min(100, Math.max(0, Math.round((sold / totalStock) * 100)))
-    : Number(item?.sold_percent || item?.soldPercent || 0);
+  const soldPercent = totalStock > 0 ? Math.min(100, Math.max(0, Math.round((sold / totalStock) * 100))) : 0;
   const isSoldOut = totalStock > 0 ? sold >= totalStock : stock === 0;
-
   return {
-    name: item?.name || item?.title || 'Sản phẩm Shopee',
-    price: price,
-    priceBeforeDiscount: before,
-    discount: Number(item?.discount || item?.raw_discount || 0),
-    imageUrl,
-    productUrl,
+    name: item?.name || 'Sản phẩm Shopee',
+    price, priceBeforeDiscount: before, discount: Number(item?.raw_discount || item?.discount || 0),
+    imageUrl: image, productUrl: item?.link || (shopId && itemId ? `https://shopee.vn/product/${shopId}/${itemId}` : 'https://shopee.vn/flash_sale'),
     stock: Number.isFinite(stock) ? stock : null,
     totalStock: Number.isFinite(totalStock) ? totalStock : null,
     sold: Number.isFinite(sold) ? sold : 0,
-    soldPercent: Number.isFinite(soldPercent) ? soldPercent : 0,
-    isSoldOut,
-    priceBucket: getPriceBucket(price)
+    soldPercent, isSoldOut, priceBucket: getPriceBucket(price)
   };
 }
-
+function passesFilter(item) {
+  if (state.priceFilter === 'all') return true;
+  if (state.priceFilter === '0d') return item.priceBucket === 'zero';
+  if (state.priceFilter === '1k') return item.priceBucket === 'onek';
+  if (state.priceFilter === '9k') return item.priceBucket === 'ninek';
+  return true;
+}
 function sortProducts(items) {
   const bucketOrder = { zero: 0, onek: 1, ninek: 2, other: 3 };
   return [...items].sort((a, b) => {
     if (a.isSoldOut !== b.isSoldOut) return a.isSoldOut ? 1 : -1;
+    if (state.sortMode === 'price-asc') return a.price - b.price;
+    if (state.sortMode === 'price-desc') return b.price - a.price;
+    if (state.sortMode === 'discount-desc') return (b.discount || 0) - (a.discount || 0);
     const bucketDiff = (bucketOrder[a.priceBucket] ?? 9) - (bucketOrder[b.priceBucket] ?? 9);
     if (bucketDiff !== 0) return bucketDiff;
     if (a.price !== b.price) return a.price - b.price;
@@ -218,74 +276,61 @@ function sortProducts(items) {
     return (a.soldPercent || 0) - (b.soldPercent || 0);
   });
 }
-
-function getFilteredData() {
+function rebuildFiltered() {
   const keyword = state.keyword.trim().toLowerCase();
-  const filtered = !keyword
-    ? state.allData
-    : state.allData.filter(item => (item.name || '').toLowerCase().includes(keyword));
-  return sortProducts(filtered);
+  const filtered = state.allData.filter(item => passesFilter(item) && (!keyword || item.name.toLowerCase().includes(keyword)));
+  state.filtered = sortProducts(filtered);
+  state.rendered = 0;
+  updateActiveFilterUI();
 }
-
-async function init() {
-  loadEl.style.display = 'block';
-  try {
-    const res = await fetch(PROMOTIONS_URL);
-    state.promotions = await res.json();
-
-    if (!Array.isArray(state.promotions) || state.promotions.length === 0) {
-      const now = new Date();
-      const slots = [0, 9, 12, 15, 18, 21];
-      state.promotions = slots.map(h => {
-        const d = new Date(now);
-        d.setHours(h, 0, 0, 0);
-        return {
-          promotionid: h,
-          start_time: Math.floor(d.getTime() / 1000),
-          end_time: Math.floor(d.getTime() / 1000) + 10800
-        };
-      });
-    }
-
-    renderPromotions();
-    const nowTs = Math.floor(Date.now() / 1000);
-    const current = state.promotions.find(p => nowTs >= p.start_time && nowTs < p.end_time) || state.promotions[0];
-    await selectPromotion(current.promotionid);
-  } catch (e) {
-    console.error(e);
-    await loadFallbackProducts();
-  } finally {
-    loadEl.style.display = 'none';
-  }
+function skeletonCard() {
+  const d = document.createElement('div');
+  d.className = 'fs-card';
+  d.innerHTML = `<div class="fs-thumb fs-skeleton"></div><div class="fs-content"><div class="fs-skeleton" style="height:16px;border-radius:8px"></div><div class="fs-skeleton" style="height:18px;width:55%;border-radius:8px"></div><div class="fs-skeleton" style="height:36px;border-radius:10px"></div></div>`;
+  return d;
 }
-
-function renderPromotions() {
-  promoBar.innerHTML = '';
-  const now = Math.floor(Date.now() / 1000);
-  state.promotions.slice(0, 6).forEach(p => {
-    const btn = document.createElement('button');
-    btn.className = 'promo-btn' + (state.currentPid == p.promotionid ? ' active' : '');
-    const date = new Date(p.start_time * 1000);
-    const timeStr = date.getHours().toString().padStart(2, '0') + ':00';
-    const status = now >= p.start_time && now < p.end_time ? 'Đang diễn ra' : (now < p.start_time ? 'Sắp diễn ra' : 'Đã kết thúc');
-    btn.innerHTML = `<span class="time">${timeStr}</span><span class="status">${status}</span>`;
-    btn.onclick = () => selectPromotion(p.promotionid);
-    promoBar.appendChild(btn);
-  });
+function itemCard(item) {
+  const a = document.createElement('a');
+  a.className = 'fs-card' + (item.isSoldOut ? ' is-soldout' : '');
+  a.href = affWrap(item.productUrl); a.target = '_blank'; a.rel = 'noopener sponsored';
+  const remain = item.totalStock != null ? Math.max(0, item.totalStock - item.sold) : item.stock;
+  const priceTag = item.priceBucket === 'zero' ? '<div class="fs-price-tag zero">0Đ</div>' : item.priceBucket === 'onek' ? '<div class="fs-price-tag onek">1K</div>' : item.priceBucket === 'ninek' ? '<div class="fs-price-tag ninek">9K</div>' : '';
+  a.innerHTML = `
+    <div class="fs-thumb">
+      <img loading="lazy" src="${item.imageUrl}" alt="${item.name.replace(/"/g,'&quot;')}">
+      ${item.discount ? `<div class="fs-badge">-${item.discount}%</div>` : ''}
+      ${priceTag}
+      ${item.isSoldOut ? '<div class="fs-soldout">HẾT HÀNG</div>' : ''}
+    </div>
+    <div class="fs-content">
+      <div class="fs-name">${item.name}</div>
+      <div class="fs-price-row"><div class="fs-now">${formatPrice(item.price)}</div>${item.priceBeforeDiscount ? `<div class="fs-before">${formatPrice(item.priceBeforeDiscount)}</div>` : ''}</div>
+      <div class="fs-stock">
+        <div class="fs-stock-line"><span>Đã bán:</span><strong>${(item.sold || 0).toLocaleString('vi-VN')}</strong></div>
+        <div class="fs-stock-line"><span>Còn lại:</span><strong>${remain != null ? Number(remain).toLocaleString('vi-VN') : '—'}</strong></div>
+        <div class="fs-stock-line"><span>Tổng flash:</span><strong>${item.totalStock != null ? Number(item.totalStock).toLocaleString('vi-VN') : '—'}</strong></div>
+      </div>
+      <div class="fs-progress"><div class="fs-progress-bar" style="width:${item.soldPercent}%"></div><div class="fs-progress-text">${item.isSoldOut ? 'ĐÃ BÁN HẾT' : `ĐÃ BÁN ${item.soldPercent}%`}</div></div>
+    </div>`;
+  return a;
 }
-
-async function selectPromotion(pid) {
-  state.currentPid = pid;
-  renderPromotions();
-  updateCountdown();
-  await fetchFlashSale(pid);
+function renderNextBatch(clear = false) {
+  if (clear) grid.innerHTML = '';
+  const slice = state.filtered.slice(state.rendered, state.rendered + PAGE_SIZE);
+  const frag = document.createDocumentFragment();
+  slice.forEach(item => frag.appendChild(itemCard(item)));
+  grid.appendChild(frag);
+  state.rendered += slice.length;
+  emptyEl.style.display = state.filtered.length ? 'none' : 'block';
+  moreBtn.style.display = state.filtered.length > PAGE_SIZE ? 'inline-flex' : 'none';
+  const done = state.rendered >= state.filtered.length;
+  moreBtn.disabled = done;
+  moreBtn.textContent = done ? 'Hết dữ liệu' : `Xem thêm (${state.filtered.length - state.rendered})`;
 }
-
+function showLoading(on) { loadingOverlay.style.display = on ? 'flex' : 'none'; }
 async function fetchFlashSale(pid) {
-  grid.innerHTML = '';
-  loadEl.style.display = 'block';
-  emptyEl.style.display = 'none';
-
+  grid.innerHTML = ''; emptyEl.style.display = 'none'; showLoading(true);
+  const skels = [...Array(8)].map(skeletonCard); skels.forEach(s => grid.appendChild(s));
   try {
     const qs = new URLSearchParams();
     if (pid) qs.set('promotionid', pid);
@@ -293,119 +338,91 @@ async function fetchFlashSale(pid) {
     const res = await fetch(`${FLASHSALE_URL}?${qs.toString()}`);
     const data = await res.json();
     const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
-
-    if (normalized.length > 0) {
-      state.usingFallback = false;
-      state.allData = normalized;
-      renderGrid(getFilteredData());
-    } else {
-      await loadFallbackProducts();
-    }
+    state.usingFallback = false;
+    state.allData = normalized.length ? normalized : await loadFallbackProducts(true);
   } catch (e) {
-    console.error('Flash API Error:', e);
-    await loadFallbackProducts();
+    console.error(e);
+    state.allData = await loadFallbackProducts(true);
+    state.usingFallback = true;
   } finally {
-    loadEl.style.display = 'none';
+    rebuildFiltered();
+    renderNextBatch(true);
+    showLoading(false);
   }
 }
-
-async function loadFallbackProducts() {
+async function loadFallbackProducts(returnOnly = false) {
   const res = await fetch(FALLBACK_FILE, { cache: 'no-store' });
   const data = await res.json();
-  state.usingFallback = true;
-  state.allData = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
-  renderGrid(getFilteredData());
+  const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
+  if (returnOnly) return normalized;
+  state.allData = normalized;
+  rebuildFiltered();
+  renderNextBatch(true);
+  return normalized;
 }
-
-function renderGrid(data) {
-  grid.innerHTML = '';
-
-  if (!data.length) {
-    emptyEl.style.display = 'block';
-    emptyEl.innerHTML = state.usingFallback
-      ? `Chưa tìm thấy sản phẩm phù hợp. <br><br><a href="${affWrap('https://shopee.vn/flash_sale')}" class="btn" style="text-decoration:none">Xem Flash Sale trên Shopee</a>`
-      : `Rất tiếc, hiện không có sản phẩm flash sale nào.`;
-    return;
-  }
-
-  emptyEl.style.display = 'none';
-
-  data.forEach(item => {
-    const card = document.createElement('a');
-    card.className = 'card';
-    card.href = affWrap(item.productUrl);
-    card.target = '_blank';
-    card.rel = 'noopener sponsored';
-
-    const remain = item.totalStock != null ? Math.max(0, item.totalStock - item.sold) : item.stock;
-    const priceTag = item.priceBucket === 'zero'
-      ? '<div class="price-tag zero">0Đ</div>'
-      : item.priceBucket === 'onek'
-        ? '<div class="price-tag onek">1K</div>'
-        : item.priceBucket === 'ninek'
-          ? '<div class="price-tag ninek">9K</div>'
-          : '';
-    card.innerHTML = `
-      <div class="thumb">
-        <img src="${item.imageUrl}" loading="lazy" alt="${item.name.replace(/"/g, '&quot;')}">
-        ${item.discount > 0 ? `<div class="badge">-${item.discount}%</div>` : ''}
-        ${priceTag}
-        ${item.isSoldOut ? '<div class="soldout-badge">HẾT HÀNG</div>' : ''}
-      </div>
-      <div class="content">
-        <div class="name">${item.name}</div>
-        <div class="price">
-          <span class="now">${formatPrice(item.price)}</span>
-          ${item.priceBeforeDiscount ? `<span class="before">${formatPrice(item.priceBeforeDiscount)}</span>` : ''}
-        </div>
-        <div class="meta">
-          <div class="stock-row"><span>Đã bán:</span><strong>${item.sold?.toLocaleString('vi-VN') || 0}</strong></div>
-          <div class="stock-row"><span>Còn lại:</span><strong>${remain != null ? Number(remain).toLocaleString('vi-VN') : '—'}</strong></div>
-          <div class="stock-row"><span>Tổng flash sale:</span><strong>${item.totalStock != null ? Number(item.totalStock).toLocaleString('vi-VN') : '—'}</strong></div>
-        </div>
-        <div class="progress-wrap">
-          <div class="progress-bar" style="width: ${item.soldPercent}%"></div>
-          <div class="progress-text">${item.isSoldOut ? 'ĐÃ BÁN HẾT' : `ĐÃ BÁN ${item.soldPercent}%`}</div>
-        </div>
-      </div>
-    `;
-    grid.appendChild(card);
+function updateActiveFilterUI() {
+  const labels = [];
+  if (state.priceFilter !== 'all') labels.push(`Giá: ${state.priceFilter === '0d' ? '0đ' : state.priceFilter === '1k' ? '1K' : '9K'}`);
+  if (state.sortMode !== 'smart') labels.push(`Sắp xếp: ${state.sortMode}`);
+  activeFilter.style.display = labels.length ? 'inline-flex' : 'none';
+  filterLabel.textContent = labels.join(' · ');
+}
+function renderPromotions() {
+  promoBar.innerHTML = '';
+  const now = Math.floor(Date.now() / 1000);
+  state.promotions.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'promo-btn' + (state.currentPid == p.promotionid ? ' active' : '');
+    const timeStr = p.sale_slot || `${new Date(p.start_time * 1000).getHours().toString().padStart(2, '0')}:00`;
+    const status = now >= p.start_time && now < p.end_time ? 'Đang diễn ra' : (now < p.start_time ? 'Sắp diễn ra' : 'Đã xong');
+    btn.innerHTML = `<span class="time">${timeStr}</span><span class="status">${status}</span>`;
+    btn.onclick = () => selectPromotion(p.promotionid);
+    promoBar.appendChild(btn);
   });
 }
-
 function updateCountdown() {
   const promo = state.promotions.find(p => p.promotionid == state.currentPid);
-  if (!promo) {
-    countdownEl.textContent = state.usingFallback ? 'Đang hiển thị dữ liệu dự phòng' : 'Đang tải...';
-    return;
-  }
-  if (window.timerInterval) clearInterval(window.timerInterval);
+  if (!promo) return countdownEl.textContent = 'Đang tải...';
+  clearInterval(window.timerInterval);
   const tick = () => {
     const now = Math.floor(Date.now() / 1000);
     const diff = now < promo.start_time ? promo.start_time - now : promo.end_time - now;
     const label = now < promo.start_time ? 'Bắt đầu sau' : 'Kết thúc sau';
-    if (diff <= 0) {
-      countdownEl.textContent = state.usingFallback ? 'Đang hiển thị dữ liệu dự phòng' : 'Hết khung giờ';
-      return;
-    }
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
-    countdownEl.textContent = `${label} ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    if (diff <= 0) return countdownEl.textContent = state.usingFallback ? 'Đang hiển thị dữ liệu dự phòng' : 'Hết khung giờ';
+    const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
+    countdownEl.textContent = `${label} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   };
-  window.timerInterval = setInterval(tick, 1000);
-  tick();
+  window.timerInterval = setInterval(tick, 1000); tick();
+}
+async function selectPromotion(pid) { state.currentPid = pid; renderPromotions(); updateCountdown(); await fetchFlashSale(pid); }
+async function init() {
+  showLoading(true);
+  try {
+    const res = await fetch(PROMOTIONS_URL);
+    state.promotions = await res.json();
+    if (!Array.isArray(state.promotions) || !state.promotions.length) throw new Error('No promotions');
+  } catch (e) {
+    console.error(e);
+    const now = new Date();
+    state.promotions = [0,9,12,15,18,21].map(h => { const d = new Date(now); d.setHours(h,0,0,0); return { promotionid: `${String(h).padStart(2,'0')}:00`, start_time: Math.floor(d.getTime()/1000), end_time: Math.floor(d.getTime()/1000)+3600, sale_slot: `${String(h).padStart(2,'0')}:00` }; });
+  }
+  renderPromotions();
+  const nowTs = Math.floor(Date.now()/1000);
+  const current = state.promotions.find(p => nowTs >= p.start_time && nowTs < p.end_time) || state.promotions[0];
+  await selectPromotion(current.promotionid);
+  showLoading(false);
 }
 
-function handleSearch() {
-  state.keyword = kwInput.value || '';
-  fetchFlashSale(state.currentPid);
-}
-
-searchBtn.addEventListener('click', handleSearch);
-kwInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') handleSearch();
-});
+searchBtn.addEventListener('click', () => { state.keyword = kwInput.value || ''; fetchFlashSale(state.currentPid); });
+kwInput.addEventListener('keydown', e => { if (e.key === 'Enter') { state.keyword = kwInput.value || ''; fetchFlashSale(state.currentPid); } });
+filterToggle.addEventListener('click', () => filterPanel.classList.toggle('open'));
+filterBtns.forEach(btn => btn.addEventListener('click', () => { filterBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); state.priceFilter = btn.dataset.price; rebuildFiltered(); renderNextBatch(true); }));
+sortBtns.forEach(btn => btn.addEventListener('click', () => { sortBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); state.sortMode = btn.dataset.sort; rebuildFiltered(); renderNextBatch(true); }));
+filterClear.addEventListener('click', () => { state.priceFilter = 'all'; state.sortMode = 'smart'; filterBtns.forEach(b => b.classList.toggle('active', b.dataset.price === 'all')); sortBtns.forEach(b => b.classList.toggle('active', b.dataset.sort === 'smart')); rebuildFiltered(); renderNextBatch(true); });
+moreBtn.addEventListener('click', () => renderNextBatch(false));
+guideBtn.addEventListener('click', () => guideModal.classList.add('open'));
+guideClose.addEventListener('click', () => guideModal.classList.remove('open'));
+guideModal.addEventListener('click', e => { if (e.target === guideModal) guideModal.classList.remove('open'); });
 
 init();
 </script>
