@@ -249,6 +249,12 @@ function getPriceBucket(price) {
 function bucketLabel(bucket) {
   return bucket === 'zero' ? '0đ' : bucket === 'onek' ? 'Từ 1K' : bucket === 'ninek' ? 'Từ 9K' : 'Tất cả';
 }
+function calcDiscountPercent(price, before, fallback = 0) {
+  const p = Number(price) || 0;
+  const b = Number(before) || 0;
+  if (b > p && p >= 0) return Math.round(((b - p) / b) * 100);
+  return Number(fallback) || 0;
+}
 function normalizeItem(item) {
   const selectedPromo = state.promotions.find(p => p.promotionid == state.currentPid) || null;
   const selectedStart = Number(selectedPromo?.start_time || 0);
@@ -280,9 +286,10 @@ function normalizeItem(item) {
   const isLiveSlot = true;
   const hasRealFlashsaleSignals = (matchesSlotLabel || matchesSlotTime || !itemSlot) && totalStock != null && before > price && Number(item?.discount || item?.raw_discount || 0) > 0;
   const isFlashsalePriceReliable = hasRealFlashsaleSignals && !isSoldOut;
+  const discount = calcDiscountPercent(price, before, item?.raw_discount || item?.discount || 0);
   return {
     name: item?.name || 'Sản phẩm Shopee',
-    price, priceBeforeDiscount: before, discount: Number(item?.raw_discount || item?.discount || 0),
+    price, priceBeforeDiscount: before, discount,
     imageUrl: image, productUrl: item?.link || (shopId && itemId ? `https://shopee.vn/product/${shopId}/${itemId}` : 'https://shopee.vn/flash_sale'),
     stock,
     remain,
