@@ -460,10 +460,8 @@ function getPreferredPromotionId() {
   const now = Math.floor(Date.now() / 1000);
   const live = state.promotions.find(p => now >= p.start_time && now < p.end_time);
   if (live) return live.promotionid;
-  const latestStarted = [...state.promotions].filter(p => now >= p.start_time).slice(-1)[0];
-  if (latestStarted) return latestStarted.promotionid;
   const next = state.promotions.find(p => now < p.start_time);
-  return next ? next.promotionid : state.promotions[0]?.promotionid || null;
+  return next ? next.promotionid : null;
 }
 function updateCountdown() {
   const promo = state.promotions.find(p => p.promotionid == state.currentPid);
