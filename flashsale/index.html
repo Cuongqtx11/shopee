@@ -13,12 +13,12 @@
       --fs-shadow:0 10px 28px rgba(15,23,42,.08);
     }
     body{background:var(--fs-bg)}
-    .fs-wrap{max-width:1000px;margin:0 auto;padding:0 16px}
-    .fs-hero{padding:28px 16px 14px;text-align:center}
-    .fs-hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#fff7ed;color:#c2410c;font-weight:800;font-size:12px;border:1px solid #fdba74}
+    .fs-wrap{max-width:1000px;margin:0 auto;padding:0 14px}
+    .fs-hero{padding:16px 12px 8px;text-align:center}
+    .fs-hero-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;background:#fff7ed;color:#c2410c;font-weight:800;font-size:11px;border:1px solid #fdba74}
     .fs-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:pulse 1.2s infinite}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(1.5)}}
-    .fs-hero h1{margin:12px 0 8px;font-size:clamp(1.9rem,5vw,3rem);line-height:1.05;font-weight:900}
+    .fs-hero h1{margin:10px 0 6px;font-size:clamp(1.65rem,4.8vw,2.55rem);line-height:1.04;font-weight:900}
     .fs-hero .accent{background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .fs-hero p{margin:0 auto;max-width:520px;color:#6b7280;font-weight:600}
 
@@ -28,17 +28,17 @@
     .fs-loading-text{font-weight:800;color:#334155}
 
     .fs-header{position:sticky;top:0;z-index:20;background:rgba(248,250,252,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(226,232,240,.9);margin-bottom:14px}
-    .promo-bar{display:flex;justify-content:center;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 0 4px}
+    .promo-bar{display:flex;justify-content:center;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px 0 2px}
     .promo-bar::-webkit-scrollbar{display:none}
-    .promo-btn{flex:0 0 auto;padding:6px 10px;border-radius:12px;border:1px solid var(--fs-ring);background:#fff;color:#475569;font-weight:800;min-width:68px;box-shadow:var(--fs-shadow);cursor:pointer}
+    .promo-btn{flex:0 0 auto;padding:5px 8px;border-radius:11px;border:1px solid var(--fs-ring);background:#fff;color:#475569;font-weight:800;min-width:62px;box-shadow:var(--fs-shadow);cursor:pointer}
     .promo-btn.active{background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff;border-color:transparent}
-    .promo-btn .time{display:block;font-size:14px;line-height:1.1}
-    .promo-btn .status{display:block;font-size:9px;opacity:.9;line-height:1.1;margin-top:2px}
+    .promo-btn .time{display:block;font-size:13px;line-height:1.05}
+    .promo-btn .status{display:block;font-size:8px;opacity:.9;line-height:1.05;margin-top:2px}
 
-    .fs-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:8px 0 10px}
-    .fs-pill{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:8px 11px;box-shadow:var(--fs-shadow);min-width:0}
-    .fs-pill input{border:none;outline:none;background:transparent;width:100%;font:inherit;font-size:14px;min-width:0}
-    .fs-search-btn,.fs-filter-toggle,.fs-loadmore{border:none;border-radius:999px;padding:8px 11px;font-weight:800;cursor:pointer;font:inherit;font-size:13px;white-space:nowrap}
+    .fs-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:6px 0 8px}
+    .fs-pill{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:7px 10px;box-shadow:var(--fs-shadow);min-width:0}
+    .fs-pill input{border:none;outline:none;background:transparent;width:100%;font:inherit;font-size:13px;min-width:0}
+    .fs-search-btn,.fs-filter-toggle,.fs-loadmore{border:none;border-radius:999px;padding:7px 10px;font-weight:800;cursor:pointer;font:inherit;font-size:12px;white-space:nowrap}
     .fs-search-btn{background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff}
     .fs-filter-toggle{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--fs-ring);color:#334155}
     .fs-filter-panel{display:none;padding:0 0 12px}
@@ -51,8 +51,8 @@
     .seg.active{background:#0f172a;color:#fff;border-color:#0f172a}
     .fs-active-filter{display:none;align-items:center;gap:8px;margin-top:8px;padding:8px 12px;border-radius:999px;background:#fff7ed;color:#9a3412;width:max-content;max-width:100%}
     .fs-active-filter button{border:none;background:transparent;cursor:pointer;font-weight:900;color:inherit}
-    .countdown-wrap{display:flex;justify-content:center;padding-bottom:10px}
-    #fsCountdown{display:inline-flex;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:6px 12px;font-weight:700;font-size:12px;color:#64748b;box-shadow:var(--fs-shadow)}
+    .countdown-wrap{display:flex;justify-content:center;padding-bottom:6px}
+    #fsCountdown{display:inline-flex;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:5px 10px;font-weight:700;font-size:11px;color:#64748b;box-shadow:var(--fs-shadow)}
 
     .fs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:4px 0 24px}
     @media(min-width:760px){.fs-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -93,6 +93,19 @@
     .fs-guide-box p{margin:0 0 12px;color:var(--fs-muted)}
     .fs-guide-box ol{margin:0 0 14px;padding-left:18px;color:#334155;display:flex;flex-direction:column;gap:8px}
     .fs-guide-close{width:100%;border:none;border-radius:14px;padding:12px;background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff;font-weight:900;cursor:pointer}
+    @media (max-width: 640px){
+      .fs-wrap{padding:0 10px}
+      .fs-hero{padding:12px 8px 6px}
+      .fs-hero h1{font-size:clamp(1.45rem,7vw,2.1rem)}
+      .promo-btn{min-width:58px;padding:5px 7px}
+      .promo-btn .time{font-size:12px}
+      .promo-btn .status{font-size:8px}
+      .fs-toolbar{grid-template-columns:minmax(0,1fr) auto auto;gap:5px}
+      .fs-pill{padding:6px 9px}
+      .fs-pill input{font-size:12px}
+      .fs-search-btn,.fs-filter-toggle{padding:6px 9px;font-size:11px}
+      #fsCountdown{font-size:10px;padding:4px 9px}
+    }
   </style>
 </head>
 <body>
