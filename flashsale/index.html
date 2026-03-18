@@ -336,13 +336,9 @@ function sortProducts(items) {
 }
 function rebuildFiltered() {
   const keyword = state.keyword.trim().toLowerCase();
-  const selectedPromo = state.promotions.find(p => p.promotionid == state.currentPid) || null;
-  const now = Math.floor(Date.now() / 1000);
-  const isUpcomingPromo = selectedPromo ? now < Number(selectedPromo.start_time || 0) : false;
   const filtered = state.allData.filter(item => {
     if (!passesFilter(item)) return false;
     if (keyword && !item.name.toLowerCase().includes(keyword)) return false;
-    if (!isUpcomingPromo && !item.hasRealFlashsaleSignals) return false;
     return true;
   });
   state.filtered = sortProducts(filtered);
@@ -359,35 +355,20 @@ function itemCard(item) {
   const a = document.createElement('a');
   a.className = 'fs-card' + (item.isSoldOut ? ' is-soldout' : '');
   a.href = affWrap(item.productUrl); a.target = '_blank'; a.rel = 'noopener sponsored';
-  const priceTag = item.priceBucket === 'zero' ? '<div class="fs-price-tag zero">0Đ</div>' : item.priceBucket === 'onek' ? '<div class="fs-price-tag onek">TỪ 1K</div>' : item.priceBucket === 'ninek' ? '<div class="fs-price-tag ninek">TỪ 9K</div>' : '';
-  const selectedPromo = state.promotions.find(p => p.promotionid == state.currentPid) || null;
-  const now = Math.floor(Date.now() / 1000);
-  const isUpcomingPromo = selectedPromo ? now < Number(selectedPromo.start_time || 0) : false;
-  const isEndedPromo = selectedPromo ? now >= Number(selectedPromo.end_time || 0) : false;
-  const progressText = item.isSoldOut
-    ? 'ĐÃ BÁN HẾT'
-    : isUpcomingPromo
-      ? 'SẮP DIỄN RA'
-      : item.totalStock != null && item.sold > 0
-        ? `ĐÃ BÁN ${item.sold.toLocaleString('vi-VN')}`
-        : 'ĐANG BÁN CHẠY';
-  const statusBadge = isUpcomingPromo
-    ? '<span class="fs-meta-badge">🕒 Sắp diễn ra</span>'
-    : isEndedPromo
-      ? '<span class="fs-meta-badge">⏹ Đã kết thúc</span>'
-      : '<span class="fs-meta-badge">🔴 Đang diễn ra</span>';
-  const hotBadge = !item.isSoldOut && item.soldPercent >= 40 ? '<span class="fs-meta-badge">🔥 Bán chạy</span>' : '';
+  const priceTag = item.priceBucket === 'zero' ? '<div class="fs-price-tag zero">0Đ</div>' : item.priceBucket === 'onek' ? '<div class="fs-price-tag onek">1K</div>' : item.priceBucket === 'ninek' ? '<div class="fs-price-tag ninek">9K</div>' : '';
+  const qtyText = item.totalStock != null ? `Số lượng: ${Number(item.totalStock).toLocaleString('vi-VN')}` : (item.stock != null ? `Số lượng: ${Number(item.stock).toLocaleString('vi-VN')}` : 'Số lượng: —');
+  const progressText = item.isSoldOut ? 'Đã hết' : (item.soldPercent > 0 ? `Đã bán ${item.soldPercent}%` : 'Đang mở bán');
   a.innerHTML = `
     <div class="fs-thumb">
       <img loading="lazy" src="${item.imageUrl}" alt="${item.name.replace(/"/g,'&quot;')}">
       ${item.discount ? `<div class="fs-badge">-${item.discount}%</div>` : ''}
       ${priceTag}
-      ${item.isSoldOut ? '<div class="fs-soldout">HẾT HÀNG</div>' : ''}
+      ${item.isSoldOut ? '<div class="fs-soldout">Đã hết</div>' : ''}
     </div>
     <div class="fs-content">
       <div class="fs-name">${item.name}</div>
-      <div class="fs-meta">${statusBadge}${hotBadge}</div>
       <div class="fs-price-row"><div class="fs-now">${formatPrice(item.price)}</div>${item.priceBeforeDiscount ? `<div class="fs-before">${formatPrice(item.priceBeforeDiscount)}</div>` : ''}</div>
+      <div class="fs-meta">${qtyText}</div>
       <div class="fs-progress"><div class="fs-progress-bar" style="width:${item.soldPercent}%"></div><div class="fs-progress-text">${progressText}</div></div>
     </div>`;
   return a;
@@ -447,16 +428,17 @@ function updateActiveFilterUI() {
 function renderPromotions() {
   promoBar.innerHTML = '';
   const now = Math.floor(Date.now() / 1000);
-  const live = state.promotions.filter(p => now >= p.start_time && now < p.end_time);
-  const upcoming = state.promotions.filter(p => now < p.start_time).slice(0, 2);
-  const ended = state.promotions.filter(p => now >= p.end_time && !(now >= p.start_time && now < p.end_time)).slice(-1);
-  const visiblePromos = [...live, ...upcoming];
-  if (!visiblePromos.length && ended.length) visiblePromos.push(ended[0]);
-  if (!visiblePromos.length) visiblePromos.push(...state.promotions.slice(0, 3));
-
-  visiblePromos.forEach(p => {
+  if (!Array.isArray(state.promotions) || !state.promotions.length) {
     const btn = document.createElement('button');
-    btn.className = 'promo-btn' + (state.currentPid == p.promotionid ? ' active' : '');
+    btn.className = 'promo-btn';
+    btn.textContent = '—';
+    btn.disabled = true;
+    promoBar.appendChild(btn);
+    return;
+  }
+  state.promotions.forEach((p, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'promo-btn' + ((String(p.promotionid) === String(state.currentPid) || (idx === 0 && !state.currentPid)) ? ' active' : '');
     const timeStr = p.sale_slot || `${new Date(p.start_time * 1000).getHours().toString().padStart(2, '0')}:00`;
     const status = now >= p.start_time && now < p.end_time ? 'Đang diễn ra' : (now < p.start_time ? 'Sắp diễn ra' : 'Đã xong');
     btn.innerHTML = `<span class="time">${timeStr}</span><span class="status">${status}</span>`;
