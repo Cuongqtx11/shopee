@@ -239,6 +239,10 @@ function formatPrice(value) {
   if (!n) return '0đ';
   return `${n.toLocaleString('vi-VN')}đ`;
 }
+function fmtHour(ts) {
+  const d = new Date(Number(ts) * 1000);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
 function getPriceBucket(price) {
   const p = Number(price) || 0;
   if (p === 0) return 'zero';
@@ -427,7 +431,6 @@ function updateActiveFilterUI() {
 }
 function renderPromotions() {
   promoBar.innerHTML = '';
-  const now = Math.floor(Date.now() / 1000);
   if (!Array.isArray(state.promotions) || !state.promotions.length) {
     const btn = document.createElement('button');
     btn.className = 'promo-btn';
@@ -436,22 +439,28 @@ function renderPromotions() {
     promoBar.appendChild(btn);
     return;
   }
+  const now = Math.floor(Date.now() / 1000);
   state.promotions.forEach((p, idx) => {
     const btn = document.createElement('button');
-    btn.className = 'promo-btn' + ((String(p.promotionid) === String(state.currentPid) || (idx === 0 && !state.currentPid)) ? ' active' : '');
-    const timeStr = p.sale_slot || `${new Date(p.start_time * 1000).getHours().toString().padStart(2, '0')}:00`;
+    btn.className = 'promo-btn';
+    btn.dataset.pid = String(p.promotionid);
+    if (String(p.promotionid) === String(state.currentPid) || (idx === 0 && !state.currentPid)) {
+      btn.classList.add('active');
+      if (!state.currentPid) state.currentPid = p.promotionid;
+    }
     const status = now >= p.start_time && now < p.end_time ? 'Đang diễn ra' : (now < p.start_time ? 'Sắp diễn ra' : 'Đã xong');
-    btn.innerHTML = `<span class="time">${timeStr}</span><span class="status">${status}</span>`;
+    btn.innerHTML = `<span class="time">${fmtHour(p.start_time)}</span><span class="status">${status}</span>`;
     btn.onclick = () => selectPromotion(p.promotionid, { userInitiated: true });
     promoBar.appendChild(btn);
   });
 }
 function getPreferredPromotionId() {
+  if (!state.promotions.length) return null;
   const now = Math.floor(Date.now() / 1000);
   const live = state.promotions.find(p => now >= p.start_time && now < p.end_time);
   if (live) return live.promotionid;
   const next = state.promotions.find(p => now < p.start_time);
-  return next ? next.promotionid : (state.promotions[0]?.promotionid || null);
+  return next ? next.promotionid : null;
 }
 function updateCountdown() {
   const promo = state.promotions.find(p => p.promotionid == state.currentPid);
@@ -496,10 +505,9 @@ async function init() {
     const now = new Date();
     state.promotions = [0,9,12,15,18,21].map(h => { const d = new Date(now); d.setHours(h,0,0,0); return { promotionid: `${String(h).padStart(2,'0')}:00`, start_time: Math.floor(d.getTime()/1000), end_time: Math.floor(d.getTime()/1000)+3600, sale_slot: `${String(h).padStart(2,'0')}:00` }; });
   }
+  state.currentPid = getPreferredPromotionId() || state.promotions[0]?.promotionid || null;
   renderPromotions();
-  const nowTs = Math.floor(Date.now()/1000);
-  const current = state.promotions.find(p => nowTs >= p.start_time && nowTs < p.end_time) || state.promotions[0];
-  await selectPromotion(current.promotionid);
+  if (state.currentPid) await selectPromotion(state.currentPid);
   setupAutoRefresh();
   showLoading(false);
 }
