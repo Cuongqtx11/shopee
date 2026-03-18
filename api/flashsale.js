@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
   const isPromotions = action === 'promotions';
 
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Cache-Control', isPromotions ? 's-maxage=300, stale-while-revalidate=600' : 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('Cache-Control', isPromotions ? 's-maxage=120, stale-while-revalidate=240' : 's-maxage=12, stale-while-revalidate=24');
   res.setHeader('X-Flashsale-Source', 'unknown');
 
   try {

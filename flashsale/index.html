@@ -205,7 +205,8 @@ const PRICE_BUCKETS = {
 
 let state = {
   promotions: [], currentPid: null, allData: [], filtered: [], rendered: 0,
-  usingFallback: false, source: 'unknown', keyword: '', priceFilter: 'all', sortMode: 'smart'
+  usingFallback: false, source: 'unknown', keyword: '', priceFilter: 'all', sortMode: 'smart',
+  autoRefreshTimer: null
 };
 
 const grid = document.getElementById('fsGrid');
@@ -277,7 +278,8 @@ function normalizeItem(item) {
     : false;
   const inSelectedSlot = true;
   const isLiveSlot = true;
-  const isFlashsalePriceReliable = (matchesSlotLabel || matchesSlotTime || !itemSlot) && !isSoldOut && totalStock != null;
+  const hasRealFlashsaleSignals = (matchesSlotLabel || matchesSlotTime || !itemSlot) && totalStock != null && before > price && Number(item?.discount || item?.raw_discount || 0) > 0;
+  const isFlashsalePriceReliable = hasRealFlashsaleSignals && !isSoldOut;
   return {
     name: item?.name || 'Sản phẩm Shopee',
     price, priceBeforeDiscount: before, discount: Number(item?.raw_discount || item?.discount || 0),
@@ -292,6 +294,7 @@ function normalizeItem(item) {
     isFlashsalePriceReliable,
     soldPercent,
     isSoldOut,
+    hasRealFlashsaleSignals,
     priceBucket: getPriceBucket(price)
   };
 }
@@ -320,7 +323,15 @@ function sortProducts(items) {
 }
 function rebuildFiltered() {
   const keyword = state.keyword.trim().toLowerCase();
-  const filtered = state.allData.filter(item => passesFilter(item) && (!keyword || item.name.toLowerCase().includes(keyword)));
+  const selectedPromo = state.promotions.find(p => p.promotionid == state.currentPid) || null;
+  const now = Math.floor(Date.now() / 1000);
+  const isUpcomingPromo = selectedPromo ? now < Number(selectedPromo.start_time || 0) : false;
+  const filtered = state.allData.filter(item => {
+    if (!passesFilter(item)) return false;
+    if (keyword && !item.name.toLowerCase().includes(keyword)) return false;
+    if (!isUpcomingPromo && !item.hasRealFlashsaleSignals) return false;
+    return true;
+  });
   state.filtered = sortProducts(filtered);
   state.rendered = 0;
   updateActiveFilterUI();
@@ -455,6 +466,13 @@ function updateCountdown() {
   };
   window.timerInterval = setInterval(tick, 1000); tick();
 }
+function setupAutoRefresh() {
+  if (state.autoRefreshTimer) clearInterval(state.autoRefreshTimer);
+  state.autoRefreshTimer = setInterval(() => {
+    if (document.hidden) return;
+    fetchFlashSale(state.currentPid);
+  }, 20000);
+}
 async function selectPromotion(pid) { state.currentPid = pid; renderPromotions(); updateCountdown(); await fetchFlashSale(pid); }
 async function init() {
   showLoading(true);
@@ -471,6 +489,7 @@ async function init() {
   const nowTs = Math.floor(Date.now()/1000);
   const current = state.promotions.find(p => nowTs >= p.start_time && nowTs < p.end_time) || state.promotions[0];
   await selectPromotion(current.promotionid);
+  setupAutoRefresh();
   showLoading(false);
 }
 
