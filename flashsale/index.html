@@ -493,11 +493,6 @@ function updateCountdown() {
 }
 function setupAutoRefresh() {
   if (state.autoRefreshTimer) clearInterval(state.autoRefreshTimer);
-  state.autoRefreshTimer = setInterval(() => {
-    if (document.hidden) return;
-    if (!state.currentPid) return;
-    fetchFlashSale(state.currentPid);
-  }, 30000);
 }
 async function selectPromotion(pid, options = {}) {
   state.currentPid = pid;
