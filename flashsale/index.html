@@ -52,7 +52,7 @@
     .fs-active-filter{display:none;align-items:center;gap:8px;margin-top:8px;padding:8px 12px;border-radius:999px;background:#fff7ed;color:#9a3412;width:max-content;max-width:100%}
     .fs-active-filter button{border:none;background:transparent;cursor:pointer;font-weight:900;color:inherit}
     .countdown-wrap{display:flex;justify-content:center;padding-bottom:10px}
-    #fsCountdown{display:inline-flex;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:8px 14px;font-weight:800;color:#334155;box-shadow:var(--fs-shadow)}
+    #fsCountdown{display:inline-flex;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:6px 12px;font-weight:700;font-size:12px;color:#64748b;box-shadow:var(--fs-shadow)}
 
     .fs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:4px 0 24px}
     @media(min-width:760px){.fs-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -316,7 +316,7 @@ function sortProducts(items) {
 }
 function rebuildFiltered() {
   const keyword = state.keyword.trim().toLowerCase();
-  const filtered = state.allData.filter(item => passesFilter(item) && (!keyword || item.name.toLowerCase().includes(keyword)));
+  const filtered = state.allData.filter(item => item.isLiveSlot && passesFilter(item) && (!keyword || item.name.toLowerCase().includes(keyword)));
   state.filtered = sortProducts(filtered);
   state.rendered = 0;
   updateActiveFilterUI();
@@ -332,11 +332,16 @@ function itemCard(item) {
   a.className = 'fs-card' + (item.isSoldOut ? ' is-soldout' : '');
   a.href = affWrap(item.productUrl); a.target = '_blank'; a.rel = 'noopener sponsored';
   const priceTag = item.priceBucket === 'zero' ? '<div class="fs-price-tag zero">0Đ</div>' : item.priceBucket === 'onek' ? '<div class="fs-price-tag onek">TỪ 1K</div>' : item.priceBucket === 'ninek' ? '<div class="fs-price-tag ninek">TỪ 9K</div>' : '';
+  const selectedPromo = state.promotions.find(p => p.promotionid == state.currentPid) || null;
+  const now = Math.floor(Date.now() / 1000);
+  const isUpcomingPromo = selectedPromo ? now < Number(selectedPromo.start_time || 0) : false;
   const progressText = item.isSoldOut
     ? 'ĐÃ BÁN HẾT'
-    : item.totalStock != null && item.sold > 0
-      ? `ĐÃ BÁN ${item.sold.toLocaleString('vi-VN')}`
-      : 'ĐANG BÁN CHẠY';
+    : isUpcomingPromo
+      ? 'SẮP DIỄN RA'
+      : item.totalStock != null && item.sold > 0
+        ? `ĐÃ BÁN ${item.sold.toLocaleString('vi-VN')}`
+        : 'ĐANG BÁN CHẠY';
   const hotBadge = !item.isSoldOut && item.soldPercent >= 40 ? '<span class="fs-meta-badge">🔥 Bán chạy</span>' : (!item.isSoldOut && item.isLiveSlot ? '<span class="fs-meta-badge">⚡ Flash Sale</span>' : '');
   a.innerHTML = `
     <div class="fs-thumb">
@@ -373,7 +378,7 @@ async function fetchFlashSale(pid) {
     const res = await fetch(`${FLASHSALE_URL}?${qs.toString()}`);
     state.source = res.headers.get('X-Flashsale-Source') || 'unknown';
     const data = await res.json();
-    const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
+    const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl && item.isLiveSlot) : [];
     state.usingFallback = state.source !== 'upstream';
     state.allData = normalized.length ? normalized : await loadFallbackProducts(true);
   } catch (e) {
@@ -424,12 +429,19 @@ function updateCountdown() {
   clearInterval(window.timerInterval);
   const tick = () => {
     const now = Math.floor(Date.now() / 1000);
-    const diff = now < promo.start_time ? promo.start_time - now : promo.end_time - now;
-    const label = now < promo.start_time ? 'Bắt đầu sau' : 'Kết thúc sau';
-    const sourceLabel = state.source === 'upstream' ? 'realtime từ feed Shopee' : state.source === 'cache' ? 'cache gần nhất' : 'dữ liệu dự phòng';
-    if (diff <= 0) return countdownEl.textContent = state.usingFallback ? `Hết khung giờ · Đang hiển thị ${sourceLabel}` : 'Hết khung giờ';
+    if (now < promo.start_time) {
+      const diff = promo.start_time - now;
+      const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
+      countdownEl.textContent = `Bắt đầu sau ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      return;
+    }
+    const diff = promo.end_time - now;
+    if (diff <= 0) {
+      countdownEl.textContent = 'Hết khung giờ';
+      return;
+    }
     const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
-    countdownEl.textContent = `${label} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} · ${sourceLabel}`;
+    countdownEl.textContent = `Kết thúc sau ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   };
   window.timerInterval = setInterval(tick, 1000); tick();
 }
