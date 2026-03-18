@@ -440,11 +440,11 @@ function renderPromotions() {
     return;
   }
   const now = Math.floor(Date.now() / 1000);
-  const live = state.promotions.filter(p => now >= p.start_time && now < p.end_time);
-  const upcoming = state.promotions.filter(p => now < p.start_time).slice(0, 3);
-  const ended = state.promotions.filter(p => now >= p.end_time).slice(-1);
-  const visible = [...live, ...upcoming];
-  if (!visible.length && ended.length) visible.push(ended[0]);
+  const current = state.promotions.find(p => now >= p.start_time && now < p.end_time)
+    || state.promotions.filter(p => now >= p.start_time).slice(-1)[0]
+    || state.promotions[0];
+  const upcoming = state.promotions.filter(p => p.start_time > now && String(p.promotionid) !== String(current?.promotionid)).slice(0, 3);
+  const visible = current ? [current, ...upcoming] : upcoming;
 
   visible.forEach((p, idx) => {
     const btn = document.createElement('button');
