@@ -501,6 +501,7 @@ async function init() {
     const res = await fetch(PROMOTIONS_URL);
     state.promotions = await res.json();
     if (!Array.isArray(state.promotions) || !state.promotions.length) throw new Error('No promotions');
+    state.promotions = [...state.promotions].sort((a, b) => Number(a.start_time || 0) - Number(b.start_time || 0));
   } catch (e) {
     console.error(e);
     const now = new Date();
