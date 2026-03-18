@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>XU Ế — Live Các Shop 📺</title>
+  <title>Săn Ngon — Live Các Shop 📺</title>
   <meta name="description" content="Danh sách các shop đang livestream trên Shopee. Tìm shop, vào live, nhận xu!">
+  <link rel="icon" type="image/svg+xml" href="/img/favicon-sanngon.svg">
   <link rel="stylesheet" href="../style.css">
   <style>
     /* live-specific overrides */
@@ -92,8 +93,8 @@
 <header class="site-header">
   <div class="header-inner">
     <a class="logo" href="/">
-      <span class="logo-emoji">🎡</span>
-      <span class="logo-text">XU Ế</span>
+      <img class="logo-mark" src="/img/logo-sanngon.svg" alt="Săn Ngon logo">
+      <span class="logo-text">Săn Ngon</span>
     </a>
     <nav class="nav">
       <a class="nav-link" href="/">Vòng quay</a>
@@ -152,7 +153,7 @@
 <div class="avatar-grid" id="grid"></div>
 
 <footer class="site-footer">
-  <p>© 2025 XU Ế · Tổng hợp vòng quay Shopee Live · Không thuộc Shopee</p>
+  <p>© 2025 Săn Ngon · Tổng hợp vòng quay Shopee Live · Không thuộc Shopee</p>
 </footer>
 
 <script>
@@ -169,7 +170,7 @@ let liveData  = [];
 
 function affLink(sessionId) {
   const origin = encodeURIComponent(`https://live.shopee.vn/share?from=live&session=${sessionId}`);
-  return `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=xue-live&origin_link=${origin}`;
+  return `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=sanngon-live&origin_link=${origin}`;
 }
 
 function render(list) {
@@ -213,7 +214,7 @@ async function loadData() {
     liveData = data;
     filterAndRender(searchEl.value);
   } catch (e) {
-    console.error("[XUE live]", e);
+    console.error("[Săn Ngon live]", e);
     loadEl.querySelector("span").textContent = "⚠️ Lỗi tải dữ liệu. Thử tải lại trang.";
   }
 }

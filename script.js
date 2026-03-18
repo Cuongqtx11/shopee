@@ -1,12 +1,12 @@
 /* ================================================================
-   XU Ế v2 — Unified Script
+   Săn Ngon — Unified Script
    Affiliate ID: 17327330054
    Mode: "spin" | "gift"  (set via <body data-mode="...">)
    ================================================================ */
 
 // ── AFFILIATE CONFIG ─────────────────────────────────────────────
 const AFF_ID  = "17327330054";
-const SUB_ID  = "xue-web";   // tracking label — đổi tùy campaign
+const SUB_ID  = "sanngon-web";   // tracking label — đổi tùy campaign
 
 /**
  * Wrap bất kỳ link Shopee thành affiliate tracking link.
@@ -30,7 +30,7 @@ const API = {
     refresh: 10_000,
     timeMs:  (item) => item.startTime,   // ms
     linkFn:  (item) => `https://live.shopee.vn/share?from=live&session=${item.sessionId}`,
-    subId:   "xue-spin",
+    subId:   "sanngon-spin",
   },
   gift: {
     url:     "https://script.google.com/macros/s/AKfycbxhd52vK5-MQ21Xg92JYKTpx3L_wOi9DNbKXJB_UWOy_DkjUTMGRDY1TQfZiksKzqudNA/exec",
@@ -44,7 +44,7 @@ const API = {
       // Nếu không, tạo link từ sessionId hoặc shopId
       return `https://shopee.vn/shop/${item.shopId || item.userId}`;
     },
-    subId:   "xue-gift",
+    subId:   "sanngon-gift",
   },
 };
 

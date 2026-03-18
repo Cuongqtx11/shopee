@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════
-   XU Ế v2 — Global Design System
+   Săn Ngon — Global Design System
    Font: Nunito (Google Fonts)
    Brand: #EE4D2D (Shopee orange)
    Aff ID: 17327330054
@@ -61,10 +61,13 @@ img { display: block; max-width: 100%; }
   gap: 10px;
 }
 .logo {
-  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
   text-decoration: none;
 }
-.logo-emoji { font-size: 20px; line-height: 1; }
+.logo-mark {
+  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(238,77,45,0.22);
+}
 .logo-text {
   font-size: 19px; font-weight: 900; letter-spacing: -0.5px;
   background: linear-gradient(120deg, var(--brand) 30%, var(--gold));
@@ -264,4 +267,5 @@ img { display: block; max-width: 100%; }
   .tele-btn   { display: none; }
   .nav-link   { font-size: 12px; padding: 4px 7px; }
   .logo-text  { font-size: 17px; }
+  .logo-mark  { width: 24px; height: 24px; }
 }

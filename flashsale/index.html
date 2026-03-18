@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>XU Ế — Flash Sale Shopee ⚡</title>
+  <title>Săn Ngon — Flash Sale Shopee ⚡</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon-sanngon.svg">
   <link rel="stylesheet" href="../style.css">
   <style>
     :root{
@@ -93,7 +94,7 @@
 <body>
 <header class="site-header">
   <div class="header-inner">
-    <a class="logo" href="/"><span class="logo-emoji">🎡</span><span class="logo-text">XU Ế</span></a>
+    <a class="logo" href="/"><img class="logo-mark" src="/img/logo-sanngon.svg" alt="Săn Ngon logo"><span class="logo-text">Săn Ngon</span></a>
     <nav class="nav">
       <a class="nav-link" href="/">Vòng quay</a>
       <a class="nav-link" href="/tui">Túi quà</a>
@@ -154,7 +155,7 @@
 <div class="aff-block" style="max-width:var(--max);margin:0 auto 40px;padding:0 14px;">
   <div style="background:var(--brand-light);border:1.5px solid rgba(238,77,45,0.2);border-radius:14px;padding:16px;text-align:center;">
     <p class="aff-eyebrow">✨ Xem thêm hàng ngàn deal khác</p>
-    <a class="aff-cta" href="https://s.shopee.vn/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fflash_sale&affiliate_id=17327330054&sub_id=xue-banner-fs" target="_blank" rel="noopener sponsored">⚡ Mở trang Flash Sale Shopee</a>
+    <a class="aff-cta" href="https://s.shopee.vn/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fflash_sale&affiliate_id=17327330054&sub_id=sanngon-banner-fs" target="_blank" rel="noopener sponsored">⚡ Mở trang Flash Sale Shopee</a>
   </div>
 </div>
 
@@ -173,7 +174,7 @@
   </div>
 </div>
 
-<footer class="site-footer"><p>© 2025 XU Ế · Tổng hợp Flash Sale Shopee · Không thuộc Shopee</p></footer>
+<footer class="site-footer"><p>© 2025 Săn Ngon · Tổng hợp Flash Sale Shopee · Không thuộc Shopee</p></footer>
 
 <script>
 const AFF_ID = '17327330054';
@@ -212,7 +213,7 @@ const guideBtn = document.getElementById('fsGuideBtn');
 const guideModal = document.getElementById('fsGuideModal');
 const guideClose = document.getElementById('fsGuideClose');
 
-function affWrap(url, subId = 'xue-fs') {
+function affWrap(url, subId = 'sanngon-fs') {
   if (!url) return '#';
   if (url.includes('affiliate_id=')) return url.replace(/affiliate_id=\d+/, `affiliate_id=${AFF_ID}`);
   return `https://s.shopee.vn/an_redir?origin_link=${encodeURIComponent(url)}&affiliate_id=${AFF_ID}&sub_id=${subId}`;
