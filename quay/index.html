@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Săn Ngon — Túi Quà Shopee Live 🎁</title>
-  <meta name="description" content="Danh sách túi quà Shopee Live realtime. Vào shop nhận túi, lấy xu ngay!">
+  <title>Săn Ngon — Vòng Quay Xu Shopee Live 🎡</title>
+  <meta name="description" content="Tổng hợp vòng quay xu Shopee Live realtime. Cập nhật mỗi 10 giây!">
+  <meta property="og:title" content="Săn Ngon — Vòng Quay Xu Shopee Live">
+  <meta property="og:description" content="Săn xu Shopee Live miễn phí, cập nhật realtime!">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://shopeelivecoin.com/">
   <link rel="icon" type="image/svg+xml" href="/img/favicon-sanngon-v2.svg">
   <link rel="stylesheet" href="../style.css">
-  <style>
-    .hero { background: linear-gradient(135deg, #C03523 0%, var(--brand) 50%, var(--gold) 100%); }
-  </style>
 </head>
-<body data-mode="gift">
+<body data-mode="spin">
 
 <header class="site-header">
   <div class="header-inner">
@@ -26,8 +27,8 @@
       <div class="menu-panel">
         <a class="menu-link " href="/"><span>🏠 Trang chủ</span><small>Flash Sale</small></a>
         <a class="menu-link " href="/flashsale"><span>⚡ Flash Sale</span><small>Deal hot</small></a>
-        <a class="menu-link " href="/quay/"><span>🎡 Vòng quay</span><small>Săn xu</small></a>
-        <a class="menu-link active" href="/tui"><span>🎁 Túi quà</span><small>Nhận quà</small></a>
+        <a class="menu-link active" href="/quay/"><span>🎡 Vòng quay</span><small>Săn xu</small></a>
+        <a class="menu-link " href="/tui"><span>🎁 Túi quà</span><small>Nhận quà</small></a>
         <a class="menu-link " href="/live"><span>📺 Live</span><small>Đang phát</small></a>
         <a class="menu-link" href="/link"><span>🔗 Đổi link</span><small>Công cụ</small></a>
       </div>
@@ -37,19 +38,15 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <h1 class="hero-title">Túi Quà <span class="hl">Shopee</span> 🎁</h1>
-    <p class="hero-sub">Canh túi quà nhanh hơn với giao diện gọn và dễ nhìn.</p>
+    <h1 class="hero-title">Vòng Quay Xu <span class="hl">Shopee</span> 🎡</h1>
+    <p class="hero-sub">Cập nhật nhanh, bố cục gọn và canh giờ quay dễ hơn.</p>
   </div>
-</div>
-
-<div class="warn-bar">
-  ⚠️ Nếu Shopee bắt xác minh robot, hãy giải cẩn thận. Sai nhiều lần = tài khoản bị khoá săn xu tạm thời.
 </div>
 
 <main class="main">
   <div class="list-hd">
     <span class="cnt-badge" id="cnt">—</span>
-    <span class="hd-label">túi quà đang / sắp mở</span>
+    <span class="hd-label">shop đang / sắp quay</span>
     <span class="pulse"></span>
     <span class="live-tag">LIVE</span>
   </div>
@@ -60,17 +57,18 @@
   </div>
 
   <div class="empty" id="empty" style="display:none">
-    😴 Chưa có túi quà nào lúc này.<br>Hãy quay lại sau một chút nhé!
+    😴 Chưa có shop nào quay lúc này.<br>Hãy quay lại sau một chút nhé!
   </div>
 
   <div class="list" id="list"></div>
 
+  
   <div class="aff-block">
     <p class="aff-eyebrow">✨ Deal nổi bật</p>
     <a class="aff-cta"
-       href="https://s.shopee.vn/an_redir?affiliate_id=17327330054&sub_id=sanngon-banner-tui&origin_link=https%3A%2F%2Fshopee.vn%2Fm%2Fdeal-1k"
+       href="https://s.shopee.vn/an_redir?affiliate_id=17327330054&sub_id=sanngon-banner-home&origin_link=https%3A%2F%2Fshopee.vn%2Fm%2Fdeal-1k"
        target="_blank" rel="noopener sponsored"
-       onclick="logClick('banner','tui-deal1k')">
+       onclick="logClick('banner','homepage-deal1k')">
       🛒 Deal 1K hôm nay trên Shopee
     </a>
   </div>
