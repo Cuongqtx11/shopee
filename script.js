@@ -63,6 +63,23 @@ async function fetchWithCache(mode) {
   return data;
 }
 
+const _giftResolved = new Map();
+async function resolveGiftLink(rawUrl) {
+  if (!rawUrl || rawUrl === '#') return rawUrl;
+  if (_giftResolved.has(rawUrl)) return _giftResolved.get(rawUrl);
+  try {
+    const qs = new URLSearchParams({ url: rawUrl });
+    const res = await fetch(`/api/resolve-gift?${qs.toString()}`);
+    const data = await res.json();
+    const finalUrl = data?.url || rawUrl;
+    _giftResolved.set(rawUrl, finalUrl);
+    return finalUrl;
+  } catch {
+    _giftResolved.set(rawUrl, rawUrl);
+    return rawUrl;
+  }
+}
+
 // ── COUNTDOWN UTIL ───────────────────────────────────────────────
 function fmtCountdown(ms) {
   if (ms <= 0) return "Đã bắt đầu";
@@ -120,6 +137,15 @@ function buildCard(item, mode) {
       <span class="countdown" data-ms="${startMs}"></span>
     </div>
   `;
+
+  if (mode === 'gift') {
+    const btn = card.querySelector('.go-btn');
+    btn.dataset.rawLink = rawLink;
+    resolveGiftLink(rawLink).then((resolved) => {
+      btn.href = affWrap(resolved || rawLink, cfg.subId);
+    });
+  }
+
   return card;
 }
 
