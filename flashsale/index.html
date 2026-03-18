@@ -30,15 +30,15 @@
     .fs-header{position:sticky;top:0;z-index:20;background:rgba(248,250,252,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(226,232,240,.9);margin-bottom:14px}
     .promo-bar{display:flex;justify-content:center;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 0 4px}
     .promo-bar::-webkit-scrollbar{display:none}
-    .promo-btn{flex:0 0 auto;padding:8px 14px;border-radius:14px;border:1px solid var(--fs-ring);background:#fff;color:#475569;font-weight:800;min-width:82px;box-shadow:var(--fs-shadow);cursor:pointer}
+    .promo-btn{flex:0 0 auto;padding:6px 10px;border-radius:12px;border:1px solid var(--fs-ring);background:#fff;color:#475569;font-weight:800;min-width:68px;box-shadow:var(--fs-shadow);cursor:pointer}
     .promo-btn.active{background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff;border-color:transparent}
-    .promo-btn .time{display:block;font-size:16px}
-    .promo-btn .status{display:block;font-size:10px;opacity:.9}
+    .promo-btn .time{display:block;font-size:14px;line-height:1.1}
+    .promo-btn .status{display:block;font-size:9px;opacity:.9;line-height:1.1;margin-top:2px}
 
-    .fs-toolbar{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 0 12px}
-    .fs-pill{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:11px 14px;box-shadow:var(--fs-shadow)}
-    .fs-pill input{border:none;outline:none;background:transparent;width:100%;font:inherit}
-    .fs-search-btn,.fs-filter-toggle,.fs-loadmore{border:none;border-radius:999px;padding:11px 14px;font-weight:800;cursor:pointer;font:inherit}
+    .fs-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:8px 0 10px}
+    .fs-pill{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--fs-ring);border-radius:999px;padding:8px 11px;box-shadow:var(--fs-shadow);min-width:0}
+    .fs-pill input{border:none;outline:none;background:transparent;width:100%;font:inherit;font-size:14px;min-width:0}
+    .fs-search-btn,.fs-filter-toggle,.fs-loadmore{border:none;border-radius:999px;padding:8px 11px;font-weight:800;cursor:pointer;font:inherit;font-size:13px;white-space:nowrap}
     .fs-search-btn{background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff}
     .fs-filter-toggle{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--fs-ring);color:#334155}
     .fs-filter-panel{display:none;padding:0 0 12px}
@@ -440,7 +440,13 @@ function renderPromotions() {
     return;
   }
   const now = Math.floor(Date.now() / 1000);
-  state.promotions.forEach((p, idx) => {
+  const live = state.promotions.filter(p => now >= p.start_time && now < p.end_time);
+  const upcoming = state.promotions.filter(p => now < p.start_time).slice(0, 3);
+  const ended = state.promotions.filter(p => now >= p.end_time).slice(-1);
+  const visible = [...live, ...upcoming];
+  if (!visible.length && ended.length) visible.push(ended[0]);
+
+  visible.forEach((p, idx) => {
     const btn = document.createElement('button');
     btn.className = 'promo-btn';
     btn.dataset.pid = String(p.promotionid);
