@@ -14,13 +14,11 @@ const SUB_ID  = "sanngon-web";   // tracking label — đổi tùy campaign
  */
 function affWrap(rawUrl, subId = SUB_ID) {
   if (!rawUrl) return "#";
-  // Link đã là shope.ee / s.shopee.vn → giữ nguyên, chỉ thêm params nếu chưa có
   if (rawUrl.includes("affiliate_id=")) {
-    // Thay affiliate_id cũ bằng của bạn
     return rawUrl.replace(/affiliate_id=\d+/, `affiliate_id=${AFF_ID}`);
   }
   const encoded = encodeURIComponent(rawUrl);
-  return `https://s.shopee.vn/an_redir?affiliate_id=${AFF_ID}&sub_id=${subId}&origin_link=${encoded}`;
+  return `https://s.shopee.vn/an_redir?origin_link=${encoded}&affiliate_id=${AFF_ID}&sub_id=${subId}`;
 }
 
 // ── API ENDPOINTS ────────────────────────────────────────────────
@@ -99,15 +97,24 @@ function buildCard(item, mode) {
 
   const card = document.createElement("article");
   card.className = "card";
+  const badgeTone = mode === 'gift' ? '🎁 Túi quà' : '🎡 Vòng quay';
   card.innerHTML = `
     <div class="card-row">
-      <span class="shop-name">${shopName}</span>
-      <span class="xu-badge">${coinLabel}</span>
+      <div class="card-main">
+        <div class="card-topline">
+          <span class="card-dot"></span>
+          <span class="shop-name">${shopName}</span>
+        </div>
+        <div class="card-meta">
+          <span class="xu-badge">${coinLabel}</span>
+          <span class="mini-badge">${badgeTone}</span>
+        </div>
+      </div>
       <a class="go-btn" href="${aLink}" target="_blank" rel="noopener noreferrer"
-         onclick="logClick('${mode}','${shopName.replace(/'/g,"\\'")}')">Vào ngay</a>
+         onclick="logClick('${mode}','${shopName.replace(/'/g,"\\'")}')">Mở ngay</a>
     </div>
     <div class="card-foot">
-      <span class="viewers">${viewers}</span>
+      <span class="viewers">${viewers || '⏱ Đang cập nhật'}</span>
       <span class="countdown" data-ms="${startMs}"></span>
     </div>
   `;
