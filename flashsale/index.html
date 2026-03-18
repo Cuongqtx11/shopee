@@ -336,6 +336,11 @@ function sortProducts(items) {
     if (state.sortMode === 'price-asc') return a.price - b.price;
     if (state.sortMode === 'price-desc') return b.price - a.price;
     if (state.sortMode === 'discount-desc') return (b.discount || 0) - (a.discount || 0);
+    if (a.isSoldOut !== b.isSoldOut) return a.isSoldOut ? 1 : -1;
+    if (a.isFlashsalePriceReliable !== b.isFlashsalePriceReliable) return a.isFlashsalePriceReliable ? -1 : 1;
+    if ((b.soldPercent || 0) !== (a.soldPercent || 0)) return (b.soldPercent || 0) - (a.soldPercent || 0);
+    if ((b.discount || 0) !== (a.discount || 0)) return (b.discount || 0) - (a.discount || 0);
+    if (a.price !== b.price) return a.price - b.price;
     return (a.originalIndex || 0) - (b.originalIndex || 0);
   });
 }
