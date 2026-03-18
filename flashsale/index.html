@@ -275,9 +275,9 @@ function normalizeItem(item) {
   const matchesSlotTime = selectedStart && selectedEnd && saleStart && saleEnd
     ? saleStart === selectedStart && saleEnd === selectedEnd
     : false;
-  const inSelectedSlot = matchesSlotLabel || matchesSlotTime || (!itemSlot && !saleStart && !saleEnd);
-  const isLiveSlot = inSelectedSlot;
-  const isFlashsalePriceReliable = inSelectedSlot && !isSoldOut && totalStock != null;
+  const inSelectedSlot = true;
+  const isLiveSlot = true;
+  const isFlashsalePriceReliable = (matchesSlotLabel || matchesSlotTime || !itemSlot) && !isSoldOut && totalStock != null;
   return {
     name: item?.name || 'Sản phẩm Shopee',
     price, priceBeforeDiscount: before, discount: Number(item?.raw_discount || item?.discount || 0),
@@ -320,7 +320,7 @@ function sortProducts(items) {
 }
 function rebuildFiltered() {
   const keyword = state.keyword.trim().toLowerCase();
-  const filtered = state.allData.filter(item => item.isLiveSlot && passesFilter(item) && (!keyword || item.name.toLowerCase().includes(keyword)));
+  const filtered = state.allData.filter(item => passesFilter(item) && (!keyword || item.name.toLowerCase().includes(keyword)));
   state.filtered = sortProducts(filtered);
   state.rendered = 0;
   updateActiveFilterUI();
@@ -382,7 +382,7 @@ async function fetchFlashSale(pid) {
     const res = await fetch(`${FLASHSALE_URL}?${qs.toString()}`);
     state.source = res.headers.get('X-Flashsale-Source') || 'unknown';
     const data = await res.json();
-    const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl && item.isLiveSlot) : [];
+    const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
     state.usingFallback = state.source !== 'upstream';
     state.allData = normalized.length ? normalized : await loadFallbackProducts(true);
   } catch (e) {
