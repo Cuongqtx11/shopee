@@ -35,12 +35,14 @@ const API = {
     refresh:  8_000,
     timeMs:  (item) => item.startTime * 1000,
     linkFn:  (item) => {
-      // Nếu sessionId chứa link rút gọn shp.ee thì dùng luôn
-      if (typeof item.sessionId === 'string' && item.sessionId.includes('shp.ee')) {
-        return item.sessionId;
-      }
-      // Nếu không, tạo link từ sessionId hoặc shopId
-      return `https://shopee.vn/shop/${item.shopId || item.userId}`;
+      const sid = String(item?.sessionId || '').trim();
+      const shopId = String(item?.shopId || '').replace(/[^0-9]/g, '');
+      const userId = String(item?.userId || '').replace(/[^0-9]/g, '');
+
+      if (/^https?:\/\//i.test(sid) && /shp\.ee|shopee\./i.test(sid)) return sid;
+      if (shopId) return `https://shopee.vn/shop/${shopId}`;
+      if (userId) return `https://shopee.vn/shop/${userId}`;
+      return 'https://shopee.vn/';
     },
     subId:   "sanngon-gift",
   },
