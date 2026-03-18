@@ -64,6 +64,7 @@ module.exports = async (req, res) => {
 
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', isPromotions ? 's-maxage=300, stale-while-revalidate=600' : 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('X-Flashsale-Source', 'unknown');
 
   try {
     const url = new URL(API_BASE);
@@ -78,28 +79,38 @@ module.exports = async (req, res) => {
     const data = JSON.parse(text);
 
     if (isPromotions) {
-      if (Array.isArray(data) && data.length) cache.promotions = data;
-      res.status(200).send(JSON.stringify(Array.isArray(data) && data.length ? data : (cache.promotions || buildFallbackPromotions())));
+      if (Array.isArray(data) && data.length) {
+        cache.promotions = data;
+        res.setHeader('X-Flashsale-Source', 'upstream');
+        res.status(200).send(JSON.stringify(data));
+        return;
+      }
+      res.setHeader('X-Flashsale-Source', cache.promotions ? 'cache' : 'fallback');
+      res.status(200).send(JSON.stringify(cache.promotions || buildFallbackPromotions()));
       return;
     }
 
     if (Array.isArray(data) && data.length) {
       if (promotionid) cache.productsByPromotion.set(String(promotionid), data);
+      res.setHeader('X-Flashsale-Source', 'upstream');
       res.status(200).send(JSON.stringify(data));
       return;
     }
 
     const cached = promotionid ? cache.productsByPromotion.get(String(promotionid)) : null;
     const fallback = cached || readFallbackProducts();
+    res.setHeader('X-Flashsale-Source', cached ? 'cache' : 'fallback');
     res.status(200).send(JSON.stringify(fallback));
   } catch (error) {
     if (isPromotions) {
+      res.setHeader('X-Flashsale-Source', cache.promotions ? 'cache' : 'fallback');
       res.status(200).send(JSON.stringify(cache.promotions || buildFallbackPromotions()));
       return;
     }
 
     const cached = promotionid ? cache.productsByPromotion.get(String(promotionid)) : null;
     const fallback = cached || readFallbackProducts();
+    res.setHeader('X-Flashsale-Source', cached ? 'cache' : 'fallback');
     res.status(200).send(JSON.stringify(fallback));
   }
 };

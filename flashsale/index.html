@@ -200,7 +200,7 @@ const PRICE_BUCKETS = {
 
 let state = {
   promotions: [], currentPid: null, allData: [], filtered: [], rendered: 0,
-  usingFallback: false, keyword: '', priceFilter: 'all', sortMode: 'smart'
+  usingFallback: false, source: 'unknown', keyword: '', priceFilter: 'all', sortMode: 'smart'
 };
 
 const grid = document.getElementById('fsGrid');
@@ -240,27 +240,44 @@ function getPriceBucket(price) {
   return 'other';
 }
 function bucketLabel(bucket) {
-  return bucket === 'zero' ? '0đ' : bucket === 'onek' ? '1K' : bucket === 'ninek' ? '9K' : 'Tất cả';
+  return bucket === 'zero' ? '0đ' : bucket === 'onek' ? 'Từ 1K' : bucket === 'ninek' ? 'Từ 9K' : 'Tất cả';
 }
 function normalizeItem(item) {
+  const now = Math.floor(Date.now() / 1000);
   const shopId = item?.shopid || item?.shopId || item?.shop_id || item?.t || null;
   const itemId = item?.itemid || item?.itemId || item?.item_id || null;
   const image = item?.img_url || item?.image_url || item?.image || '';
   const price = Number(item?.price || 0);
   const before = Number(item?.price_before_discount || 0);
-  const sold = Number(item?.sold || 0);
-  const totalStock = Number(item?.flash_sale_stock || item?.total_stock || 0);
-  const stock = Number(item?.stock);
+  const rawStock = Number(item?.stock);
+  const rawTotal = Number(item?.flash_sale_stock || item?.total_stock || 0);
+  const rawSold = Number(item?.sold || 0);
+  const saleStart = Number(item?.sale_time || item?.start_time || 0);
+  const saleEnd = Number(item?.time_end || item?.end_time || 0);
+  const stock = Number.isFinite(rawStock) && rawStock >= 0 ? rawStock : null;
+  const inferredSold = rawTotal > 0 && stock != null ? Math.max(0, rawTotal - stock) : rawSold;
+  const sold = Number.isFinite(rawSold) ? Math.max(rawSold, inferredSold) : inferredSold;
+  const totalStock = rawTotal > 0 ? Math.max(rawTotal, sold + (stock || 0)) : (stock != null && sold > 0 ? sold + stock : null);
+  const remain = totalStock != null ? Math.max(0, totalStock - sold) : stock;
   const soldPercent = totalStock > 0 ? Math.min(100, Math.max(0, Math.round((sold / totalStock) * 100))) : 0;
-  const isSoldOut = totalStock > 0 ? sold >= totalStock : stock === 0;
+  const isSoldOut = totalStock > 0 ? remain <= 0 : stock === 0;
+  const isLiveSlot = saleStart && saleEnd ? (now >= saleStart && now < saleEnd) : true;
+  const isFlashsalePriceReliable = isLiveSlot && !isSoldOut && totalStock != null;
   return {
     name: item?.name || 'Sản phẩm Shopee',
     price, priceBeforeDiscount: before, discount: Number(item?.raw_discount || item?.discount || 0),
     imageUrl: image, productUrl: item?.link || (shopId && itemId ? `https://shopee.vn/product/${shopId}/${itemId}` : 'https://shopee.vn/flash_sale'),
-    stock: Number.isFinite(stock) ? stock : null,
-    totalStock: Number.isFinite(totalStock) ? totalStock : null,
-    sold: Number.isFinite(sold) ? sold : 0,
-    soldPercent, isSoldOut, priceBucket: getPriceBucket(price)
+    stock,
+    remain,
+    totalStock,
+    sold,
+    saleStart,
+    saleEnd,
+    isLiveSlot,
+    isFlashsalePriceReliable,
+    soldPercent,
+    isSoldOut,
+    priceBucket: getPriceBucket(price)
   };
 }
 function passesFilter(item) {
@@ -273,7 +290,9 @@ function passesFilter(item) {
 function sortProducts(items) {
   const bucketOrder = { zero: 0, onek: 1, ninek: 2, other: 3 };
   return [...items].sort((a, b) => {
+    if (a.isLiveSlot !== b.isLiveSlot) return a.isLiveSlot ? -1 : 1;
     if (a.isSoldOut !== b.isSoldOut) return a.isSoldOut ? 1 : -1;
+    if (a.isFlashsalePriceReliable !== b.isFlashsalePriceReliable) return a.isFlashsalePriceReliable ? -1 : 1;
     if (state.sortMode === 'price-asc') return a.price - b.price;
     if (state.sortMode === 'price-desc') return b.price - a.price;
     if (state.sortMode === 'discount-desc') return (b.discount || 0) - (a.discount || 0);
@@ -301,8 +320,10 @@ function itemCard(item) {
   const a = document.createElement('a');
   a.className = 'fs-card' + (item.isSoldOut ? ' is-soldout' : '');
   a.href = affWrap(item.productUrl); a.target = '_blank'; a.rel = 'noopener sponsored';
-  const remain = item.totalStock != null ? Math.max(0, item.totalStock - item.sold) : item.stock;
-  const priceTag = item.priceBucket === 'zero' ? '<div class="fs-price-tag zero">0Đ</div>' : item.priceBucket === 'onek' ? '<div class="fs-price-tag onek">1K</div>' : item.priceBucket === 'ninek' ? '<div class="fs-price-tag ninek">9K</div>' : '';
+  const remain = item.remain;
+  const priceTag = item.priceBucket === 'zero' ? '<div class="fs-price-tag zero">0Đ</div>' : item.priceBucket === 'onek' ? '<div class="fs-price-tag onek">TỪ 1K</div>' : item.priceBucket === 'ninek' ? '<div class="fs-price-tag ninek">TỪ 9K</div>' : '';
+  const liveStatus = item.isLiveSlot ? (item.isSoldOut ? 'Đã hết trong khung flash sale' : 'Đang nằm trong khung flash sale') : 'Chưa/không còn nằm trong khung flash sale';
+  const priceHint = item.isFlashsalePriceReliable ? 'Giá flash sale hiện tại' : 'Giá có thể thay đổi theo tài khoản, phân loại và tồn kho';
   a.innerHTML = `
     <div class="fs-thumb">
       <img loading="lazy" src="${item.imageUrl}" alt="${item.name.replace(/"/g,'&quot;')}">
@@ -314,11 +335,13 @@ function itemCard(item) {
       <div class="fs-name">${item.name}</div>
       <div class="fs-price-row"><div class="fs-now">${formatPrice(item.price)}</div>${item.priceBeforeDiscount ? `<div class="fs-before">${formatPrice(item.priceBeforeDiscount)}</div>` : ''}</div>
       <div class="fs-stock">
-        <div class="fs-stock-line"><span>Đã bán:</span><strong>${(item.sold || 0).toLocaleString('vi-VN')}</strong></div>
+        <div class="fs-stock-line"><span>Trạng thái:</span><strong>${liveStatus}</strong></div>
+        <div class="fs-stock-line"><span>Đã bán:</span><strong>${item.totalStock != null ? (item.sold || 0).toLocaleString('vi-VN') : '—'}</strong></div>
         <div class="fs-stock-line"><span>Còn lại:</span><strong>${remain != null ? Number(remain).toLocaleString('vi-VN') : '—'}</strong></div>
         <div class="fs-stock-line"><span>Tổng flash:</span><strong>${item.totalStock != null ? Number(item.totalStock).toLocaleString('vi-VN') : '—'}</strong></div>
       </div>
       <div class="fs-progress"><div class="fs-progress-bar" style="width:${item.soldPercent}%"></div><div class="fs-progress-text">${item.isSoldOut ? 'ĐÃ BÁN HẾT' : `ĐÃ BÁN ${item.soldPercent}%`}</div></div>
+      <div class="fs-stock-line" style="margin-top:8px"><span>Lưu ý giá:</span><strong>${priceHint}</strong></div>
     </div>`;
   return a;
 }
@@ -340,18 +363,21 @@ async function fetchFlashSale(pid) {
     if (pid) qs.set('promotionid', pid);
     if (state.keyword.trim()) qs.set('keyword', state.keyword.trim());
     const res = await fetch(`${FLASHSALE_URL}?${qs.toString()}`);
+    state.source = res.headers.get('X-Flashsale-Source') || 'unknown';
     const data = await res.json();
     const normalized = Array.isArray(data) ? data.map(normalizeItem).filter(item => item.imageUrl && item.productUrl) : [];
-    state.usingFallback = false;
+    state.usingFallback = state.source !== 'upstream';
     state.allData = normalized.length ? normalized : await loadFallbackProducts(true);
   } catch (e) {
     console.error(e);
     state.allData = await loadFallbackProducts(true);
     state.usingFallback = true;
+    state.source = 'fallback';
   } finally {
     rebuildFiltered();
     renderNextBatch(true);
     showLoading(false);
+    updateCountdown();
   }
 }
 async function loadFallbackProducts(returnOnly = false) {
@@ -392,9 +418,10 @@ function updateCountdown() {
     const now = Math.floor(Date.now() / 1000);
     const diff = now < promo.start_time ? promo.start_time - now : promo.end_time - now;
     const label = now < promo.start_time ? 'Bắt đầu sau' : 'Kết thúc sau';
-    if (diff <= 0) return countdownEl.textContent = state.usingFallback ? 'Đang hiển thị dữ liệu dự phòng' : 'Hết khung giờ';
+    const sourceLabel = state.source === 'upstream' ? 'realtime từ feed Shopee' : state.source === 'cache' ? 'cache gần nhất' : 'dữ liệu dự phòng';
+    if (diff <= 0) return countdownEl.textContent = state.usingFallback ? `Hết khung giờ · Đang hiển thị ${sourceLabel}` : 'Hết khung giờ';
     const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
-    countdownEl.textContent = `${label} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    countdownEl.textContent = `${label} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} · ${sourceLabel}`;
   };
   window.timerInterval = setInterval(tick, 1000); tick();
 }
