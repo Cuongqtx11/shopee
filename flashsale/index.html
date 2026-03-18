@@ -72,16 +72,20 @@
     .fs-price-row{display:flex;align-items:end;gap:6px;flex-wrap:wrap}
     .fs-now{font-size:16px;font-weight:900;color:var(--fs-brand)}
     .fs-before{font-size:11px;text-decoration:line-through;color:var(--fs-muted)}
-    .fs-stock{font-size:11px;color:var(--fs-muted);display:flex;flex-direction:column;gap:2px}
-    .fs-stock-line{display:flex;justify-content:space-between;gap:8px}
-    .fs-progress{position:relative;height:17px;border-radius:999px;overflow:hidden;background:#ffe4dd}
-    .fs-progress-bar{height:100%;background:linear-gradient(90deg,#ff7a45,#ee4d2d)}
-    .fs-progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.18)}
+    .fs-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--fs-muted);min-height:18px}
+    .fs-flame{font-size:13px}
+    .fs-meta-badge{display:inline-flex;align-items:center;gap:4px;background:#fff7ed;color:#c2410c;border:1px solid #fdba74;border-radius:999px;padding:3px 8px;font-weight:900}
+    .fs-progress{position:relative;height:20px;border-radius:999px;overflow:hidden;background:#ffd9cf}
+    .fs-progress-bar{height:100%;background:linear-gradient(90deg,#ff934f,#ee4d2d)}
+    .fs-progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.18);letter-spacing:.2px}
     .fs-empty{text-align:center;padding:48px 16px;color:var(--fs-muted);font-weight:700}
 
     .fs-skeleton{background:linear-gradient(90deg,#f1f5f9,#e2e8f0,#f1f5f9);background-size:200% 100%;animation:shimmer 1.4s infinite}
     @keyframes shimmer{to{background-position:-200% 0}}
-    .fs-guide-btn{position:fixed;right:16px;bottom:20px;width:54px;height:54px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2));color:#fff;box-shadow:0 12px 28px rgba(238,77,45,.35);cursor:pointer;z-index:25}
+    .fs-guide-btn,.fs-top-btn{position:fixed;right:16px;width:54px;height:54px;border:none;border-radius:50%;color:#fff;box-shadow:0 12px 28px rgba(238,77,45,.35);cursor:pointer;z-index:25}
+    .fs-guide-btn{bottom:20px;background:linear-gradient(135deg,var(--fs-brand),var(--fs-brand-2))}
+    .fs-top-btn{bottom:84px;background:linear-gradient(135deg,#0f172a,#334155);display:none;font-size:22px;font-weight:900}
+    .fs-top-btn.show{display:block}
     .fs-guide-modal{position:fixed;inset:0;background:rgba(15,23,42,.52);display:none;align-items:center;justify-content:center;padding:18px;z-index:40}
     .fs-guide-modal.open{display:flex}
     .fs-guide-box{width:min(440px,100%);background:#fff;border-radius:22px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
@@ -168,6 +172,7 @@
   </div>
 </div>
 
+<button id="fsTopBtn" class="fs-top-btn" title="Lên đầu trang">↑</button>
 <button id="fsGuideBtn" class="fs-guide-btn" title="Hướng dẫn">?</button>
 <div id="fsGuideModal" class="fs-guide-modal">
   <div class="fs-guide-box">
@@ -218,6 +223,7 @@ const activeFilter = document.getElementById('fsActiveFilter');
 const filterLabel = document.getElementById('fsFilterLabel');
 const filterClear = document.getElementById('fsFilterClear');
 const sentinel = document.getElementById('fsSentinel');
+const topBtn = document.getElementById('fsTopBtn');
 const guideBtn = document.getElementById('fsGuideBtn');
 const guideModal = document.getElementById('fsGuideModal');
 const guideClose = document.getElementById('fsGuideClose');
@@ -243,7 +249,9 @@ function bucketLabel(bucket) {
   return bucket === 'zero' ? '0đ' : bucket === 'onek' ? 'Từ 1K' : bucket === 'ninek' ? 'Từ 9K' : 'Tất cả';
 }
 function normalizeItem(item) {
-  const now = Math.floor(Date.now() / 1000);
+  const selectedPromo = state.promotions.find(p => p.promotionid == state.currentPid) || null;
+  const selectedStart = Number(selectedPromo?.start_time || 0);
+  const selectedEnd = Number(selectedPromo?.end_time || 0);
   const shopId = item?.shopid || item?.shopId || item?.shop_id || item?.t || null;
   const itemId = item?.itemid || item?.itemId || item?.item_id || null;
   const image = item?.img_url || item?.image_url || item?.image || '';
@@ -261,8 +269,11 @@ function normalizeItem(item) {
   const remain = totalStock != null ? Math.max(0, totalStock - sold) : stock;
   const soldPercent = totalStock > 0 ? Math.min(100, Math.max(0, Math.round((sold / totalStock) * 100))) : 0;
   const isSoldOut = totalStock > 0 ? remain <= 0 : stock === 0;
-  const isLiveSlot = saleStart && saleEnd ? (now >= saleStart && now < saleEnd) : true;
-  const isFlashsalePriceReliable = isLiveSlot && !isSoldOut && totalStock != null;
+  const inSelectedSlot = selectedStart && selectedEnd
+    ? ((saleStart && saleEnd) ? saleStart === selectedStart && saleEnd === selectedEnd : true)
+    : true;
+  const isLiveSlot = inSelectedSlot;
+  const isFlashsalePriceReliable = inSelectedSlot && !isSoldOut && totalStock != null;
   return {
     name: item?.name || 'Sản phẩm Shopee',
     price, priceBeforeDiscount: before, discount: Number(item?.raw_discount || item?.discount || 0),
@@ -320,10 +331,13 @@ function itemCard(item) {
   const a = document.createElement('a');
   a.className = 'fs-card' + (item.isSoldOut ? ' is-soldout' : '');
   a.href = affWrap(item.productUrl); a.target = '_blank'; a.rel = 'noopener sponsored';
-  const remain = item.remain;
   const priceTag = item.priceBucket === 'zero' ? '<div class="fs-price-tag zero">0Đ</div>' : item.priceBucket === 'onek' ? '<div class="fs-price-tag onek">TỪ 1K</div>' : item.priceBucket === 'ninek' ? '<div class="fs-price-tag ninek">TỪ 9K</div>' : '';
-  const liveStatus = item.isLiveSlot ? (item.isSoldOut ? 'Đã hết trong khung flash sale' : 'Đang nằm trong khung flash sale') : 'Chưa/không còn nằm trong khung flash sale';
-  const priceHint = item.isFlashsalePriceReliable ? 'Giá flash sale hiện tại' : 'Giá có thể thay đổi theo tài khoản, phân loại và tồn kho';
+  const progressText = item.isSoldOut
+    ? 'ĐÃ BÁN HẾT'
+    : item.totalStock != null && item.sold > 0
+      ? `ĐÃ BÁN ${item.sold.toLocaleString('vi-VN')}`
+      : 'ĐANG BÁN CHẠY';
+  const hotBadge = !item.isSoldOut && item.soldPercent >= 40 ? '<span class="fs-meta-badge">🔥 Bán chạy</span>' : (!item.isSoldOut && item.isLiveSlot ? '<span class="fs-meta-badge">⚡ Flash Sale</span>' : '');
   a.innerHTML = `
     <div class="fs-thumb">
       <img loading="lazy" src="${item.imageUrl}" alt="${item.name.replace(/"/g,'&quot;')}">
@@ -333,15 +347,9 @@ function itemCard(item) {
     </div>
     <div class="fs-content">
       <div class="fs-name">${item.name}</div>
+      <div class="fs-meta">${hotBadge}</div>
       <div class="fs-price-row"><div class="fs-now">${formatPrice(item.price)}</div>${item.priceBeforeDiscount ? `<div class="fs-before">${formatPrice(item.priceBeforeDiscount)}</div>` : ''}</div>
-      <div class="fs-stock">
-        <div class="fs-stock-line"><span>Trạng thái:</span><strong>${liveStatus}</strong></div>
-        <div class="fs-stock-line"><span>Đã bán:</span><strong>${item.totalStock != null ? (item.sold || 0).toLocaleString('vi-VN') : '—'}</strong></div>
-        <div class="fs-stock-line"><span>Còn lại:</span><strong>${remain != null ? Number(remain).toLocaleString('vi-VN') : '—'}</strong></div>
-        <div class="fs-stock-line"><span>Tổng flash:</span><strong>${item.totalStock != null ? Number(item.totalStock).toLocaleString('vi-VN') : '—'}</strong></div>
-      </div>
-      <div class="fs-progress"><div class="fs-progress-bar" style="width:${item.soldPercent}%"></div><div class="fs-progress-text">${item.isSoldOut ? 'ĐÃ BÁN HẾT' : `ĐÃ BÁN ${item.soldPercent}%`}</div></div>
-      <div class="fs-stock-line" style="margin-top:8px"><span>Lưu ý giá:</span><strong>${priceHint}</strong></div>
+      <div class="fs-progress"><div class="fs-progress-bar" style="width:${item.soldPercent}%"></div><div class="fs-progress-text">${progressText}</div></div>
     </div>`;
   return a;
 }
@@ -458,6 +466,10 @@ if (sentinel) io.observe(sentinel);
 guideBtn.addEventListener('click', () => guideModal.classList.add('open'));
 guideClose.addEventListener('click', () => guideModal.classList.remove('open'));
 guideModal.addEventListener('click', e => { if (e.target === guideModal) guideModal.classList.remove('open'); });
+topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+window.addEventListener('scroll', () => {
+  topBtn.classList.toggle('show', window.scrollY > 700);
+}, { passive: true });
 
 init();
 </script>
