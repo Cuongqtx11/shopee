@@ -252,6 +252,7 @@ function normalizeItem(item) {
   const selectedPromo = state.promotions.find(p => p.promotionid == state.currentPid) || null;
   const selectedStart = Number(selectedPromo?.start_time || 0);
   const selectedEnd = Number(selectedPromo?.end_time || 0);
+  const selectedSlot = String(selectedPromo?.sale_slot || state.currentPid || '').trim();
   const shopId = item?.shopid || item?.shopId || item?.shop_id || item?.t || null;
   const itemId = item?.itemid || item?.itemId || item?.item_id || null;
   const image = item?.img_url || item?.image_url || item?.image || '';
@@ -260,6 +261,7 @@ function normalizeItem(item) {
   const rawStock = Number(item?.stock);
   const rawTotal = Number(item?.flash_sale_stock || item?.total_stock || 0);
   const rawSold = Number(item?.sold || 0);
+  const itemSlot = String(item?.sale_slot || item?.promotionid || '').trim();
   const saleStart = Number(item?.sale_time || item?.start_time || 0);
   const saleEnd = Number(item?.time_end || item?.end_time || 0);
   const stock = Number.isFinite(rawStock) && rawStock >= 0 ? rawStock : null;
@@ -269,9 +271,11 @@ function normalizeItem(item) {
   const remain = totalStock != null ? Math.max(0, totalStock - sold) : stock;
   const soldPercent = totalStock > 0 ? Math.min(100, Math.max(0, Math.round((sold / totalStock) * 100))) : 0;
   const isSoldOut = totalStock > 0 ? remain <= 0 : stock === 0;
-  const inSelectedSlot = selectedStart && selectedEnd
-    ? ((saleStart && saleEnd) ? saleStart === selectedStart && saleEnd === selectedEnd : true)
-    : true;
+  const matchesSlotLabel = !!selectedSlot && !!itemSlot && itemSlot === selectedSlot;
+  const matchesSlotTime = selectedStart && selectedEnd && saleStart && saleEnd
+    ? saleStart === selectedStart && saleEnd === selectedEnd
+    : false;
+  const inSelectedSlot = matchesSlotLabel || matchesSlotTime || (!itemSlot && !saleStart && !saleEnd);
   const isLiveSlot = inSelectedSlot;
   const isFlashsalePriceReliable = inSelectedSlot && !isSoldOut && totalStock != null;
   return {
